@@ -23,10 +23,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # Upstream currently builds using Xcode 26.3.0.
-          if [ -d /Applications/Xcode_26.3.0.app/Contents/Developer ]; then
-            sudo xcode-select -s /Applications/Xcode_26.3.0.app/Contents/Developer
-          fi
+          for candidate in /Applications/Xcode_26.3.app /Applications/Xcode_26.3.0.app; do
+            if [ -d "$candidate/Contents/Developer" ]; then
+              sudo xcode-select -s "$candidate/Contents/Developer"
+              break
+            fi
+          done
           xcodebuild -version
           xcrun --sdk iphoneos --show-sdk-version
           python3 - <<'PYCODE'
@@ -36,6 +38,54 @@ jobs:
           if version < (26, 3):
               raise SystemExit('Xcode 26.3 or newer is required for this baseline.')
           PYCODE
+
+      - name: Prepare consistent package graph
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PYCODE'
+          from pathlib import Path
+          import json
+
+          report = Path('build-report')
+          report.mkdir(exist_ok=True)
+          project_lock = Path('Feather.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved')
+          workspace_lock = Path('Feather.xcworkspace/xcshareddata/swiftpm/Package.resolved')
+          project = json.loads(project_lock.read_text())
+          workspace = json.loads(workspace_lock.read_text())
+          # These eight pins are obsolete LicensePlist/tool dependencies in this revision.
+          obsolete = {'apikit', 'heliumlogger', 'licenseplist', 'loggerapi',
+                      'swift-argument-parser', 'swift-html-entities', 'xcodeedit', 'yams'}
+          project_ids = {p['identity'] for p in project['pins']}
+          workspace_ids = {p['identity'] for p in workspace['pins']}
+          if project_ids - workspace_ids != obsolete or workspace_ids - project_ids:
+              raise SystemExit('Unexpected upstream package list; refusing to change dependency pins.')
+          (report / 'project-lock-before.json').write_text(project_lock.read_text())
+          (report / 'workspace-lock-before.json').write_text(workspace_lock.read_text())
+          # Preserve versions/revisions actually resolved in run 01, rather than upgrading packages.
+          project['pins'] = [p for p in project['pins'] if p['identity'] not in obsolete]
+          # The old originHash refers to the old graph; let Xcode recompute it.
+          project.pop('originHash', None)
+          text = json.dumps(project, indent=2) + '\n'
+          project_lock.write_text(text)
+          workspace_lock.write_text(text)
+          (report / 'pins-input.json').write_text(text)
+
+          makefile = Path('Makefile')
+          content = makefile.read_text()
+          old = '-project Feather.xcodeproj'
+          if content.count(old) != 1:
+              raise SystemExit('Unexpected Makefile: cannot apply workspace change.')
+          makefile.write_text(content.replace(old, '-workspace Feather.xcworkspace'))
+          (report / 'preparation.txt').write_text(
+              'Removed obsolete pins: ' + ', '.join(sorted(obsolete)) + '\n'
+              'Kept 28 package revisions from the run-01 project lock.\n'
+              'Synchronized project/workspace lock files.\n'
+              'Build uses Feather.xcworkspace with all four local packages.\n'
+              'App source, signing implementation and Xcode version unchanged.\n')
+          print((report / 'preparation.txt').read_text())
+          PYCODE
+          git diff -- Makefile Feather.xcodeproj Feather.xcworkspace > build-report/changes.patch
 
       - name: Build iPhone IPA
         shell: bash
@@ -48,23 +98,32 @@ jobs:
           make iphoneos 2>&1 | tee build-report/build.log
           test -s packages/Feather.ipa
           unzip -t packages/Feather.ipa
-          cp packages/Feather.ipa packages/Feather-Baseline-01.ipa
+          cp packages/Feather.ipa packages/Feather-Baseline-02.ipa
           rm packages/Feather.ipa
-          shasum -a 256 packages/Feather-Baseline-01.ipa > build-report/SHA256.txt
+          shasum -a 256 packages/Feather-Baseline-02.ipa > build-report/SHA256.txt
 
       - name: Downloadable IPA for your signing bot
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: Feather-Baseline-01-IPA
-          path: packages/Feather-Baseline-01.ipa
+          name: Feather-Baseline-02-IPA
+          path: packages/Feather-Baseline-02.ipa
           if-no-files-found: error
           retention-days: 7
+
+      - name: Collect resolved dependency state
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p build-report
+          if [ -f Feather.xcworkspace/xcshareddata/swiftpm/Package.resolved ]; then
+            cp Feather.xcworkspace/xcshareddata/swiftpm/Package.resolved build-report/pins-final.json
+          fi
 
       - name: Build report
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: Feather-Baseline-01-Report
+          name: Feather-Baseline-02-Report
           path: build-report/
           if-no-files-found: ignore
           retention-days: 7
