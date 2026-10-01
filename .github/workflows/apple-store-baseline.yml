@@ -1,0 +1,70 @@
+name: Apple Store - baseline IPA
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - name: Checkout verified Feather revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: claration/Feather
+          ref: 7078b053c0af262809a48e4d3898d42b0d35fedf
+          submodules: recursive
+          persist-credentials: false
+
+      - name: Select Xcode
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Upstream currently builds using Xcode 26.3.0.
+          if [ -d /Applications/Xcode_26.3.0.app/Contents/Developer ]; then
+            sudo xcode-select -s /Applications/Xcode_26.3.0.app/Contents/Developer
+          fi
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
+          python3 - <<'PYCODE'
+          import re, subprocess
+          output = subprocess.check_output(['xcodebuild', '-version'], text=True)
+          version = tuple(map(int, re.search(r'Xcode (\d+)\.(\d+)', output).groups()))
+          if version < (26, 3):
+              raise SystemExit('Xcode 26.3 or newer is required for this baseline.')
+          PYCODE
+
+      - name: Build iPhone IPA
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p build-report
+          git rev-parse HEAD > build-report/source-commit.txt
+          git submodule status --recursive >> build-report/source-commit.txt
+          xcodebuild -version > build-report/xcode.txt
+          make iphoneos 2>&1 | tee build-report/build.log
+          test -s packages/Feather.ipa
+          unzip -t packages/Feather.ipa
+          cp packages/Feather.ipa packages/Feather-Baseline-01.ipa
+          rm packages/Feather.ipa
+          shasum -a 256 packages/Feather-Baseline-01.ipa > build-report/SHA256.txt
+
+      - name: Downloadable IPA for your signing bot
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: Feather-Baseline-01-IPA
+          path: packages/Feather-Baseline-01.ipa
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Build report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: Feather-Baseline-01-Report
+          path: build-report/
+          if-no-files-found: ignore
+          retention-days: 7
