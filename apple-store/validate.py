@@ -22,14 +22,29 @@ for app in apps:
     assert not re.search(r'kamohacks|@unlim|tg@|appassassin',app['name'],re.I)
     if app['kind']=='subscription': assert not app['ipaUrl'] and app['subscriptionPlans']
 assert (resources/'AppleStoreLicense.txt').is_file()
-icon=assets/'AppIcon.appiconset';data=json.loads((icon/'Contents.json').read_text())
+icon=assets/'AppleStoreIcon.appiconset';data=json.loads((icon/'Contents.json').read_text())
 assert data['images'][0]['size']=='1024x1024' and (icon/data['images'][0]['filename']).is_file()
+assert not (resources/'AppIcon.icon').exists(), 'Old Icon Composer file overrides the new icon'
+assert not (assets/'AppIcon.appiconset').exists()
+assert not (resources/'Icons').exists()
+assert not (resources/'feather_extension.png').exists()
+assert (resources/'AppIcon.png').read_bytes() == (icon/'AppleStore.png').read_bytes()
+assert {i.get('appearances',[{'value':'default'}])[0]['value'] for i in data['images']} == {'default','dark','tinted'}
+assert {i['filename'] for i in data['images']} == {'AppleStore.png'}
 project=(root/'Feather.xcodeproj/project.pbxproj').read_text()
 assert project.count('INFOPLIST_KEY_CFBundleDisplayName = "Apple Store";')==2
-assert 'FEATHER_PROJECT_VERSION=3.0' in (root/'Feather.xcconfig').read_text()
+assert project.count('ASSETCATALOG_COMPILER_APPICON_NAME = AppleStoreIcon;')==2
+assert project.count('CURRENT_PROJECT_VERSION = 302;')==2
+assert 'FEATHER_PROJECT_VERSION=3.2' in (root/'Feather.xcconfig').read_text()
 assert 'FEATHER_PRODUCT_BUNDLE_IDENTIFIER=ru.ipa95.applestore' in (root/'Feather.xcconfig').read_text()
 plist=plistlib.loads((resources/'Info.plist').read_bytes())
 assert plist['CFBundleURLTypes'][0]['CFBundleURLSchemes']==['appleipa']
+assert plist['CFBundleName'] == plist['CFBundleDisplayName'] == 'Apple Store'
+for key in ['CFBundleIcons','CFBundleIcons~ipad']:
+    assert plist[key]['CFBundlePrimaryIcon']['CFBundleIconName'] == 'AppleStoreIcon'
+    assert 'CFBundleAlternateIcons' not in plist[key]
+assert plist['CFBundleIconFile'] == 'AppIcon.png'
+assert (resources/'AppleStoreDocument.png').is_file()
 entry=(root/'Feather/FeatherApp.swift').read_text()
 assert 'StoreRootView()' in entry and 'VariedTabbarView()' not in entry
 p1=json.loads((root/'Feather.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved').read_text())

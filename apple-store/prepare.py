@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Apply the Apple Store 3.0 overlay to the pinned, tested Feather revision.
+"""Apply the Apple Store 3.2 overlay to the pinned, tested Feather revision.
 No signing certificates or secrets are required. Run: python3 prepare.py SOURCE.
 """
 from pathlib import Path
@@ -31,10 +31,11 @@ for p in [p1,p2]: p.write_text(json.dumps(project,indent=2)+'\n')
 change('Makefile','-project Feather.xcodeproj','-workspace Feather.xcworkspace')
 
 # New app identity allows baseline Feather and Apple Store to coexist.
-change('Feather.xcconfig','FEATHER_PROJECT_VERSION=2.9.0','FEATHER_PROJECT_VERSION=3.0')
+change('Feather.xcconfig','FEATHER_PROJECT_VERSION=2.9.0','FEATHER_PROJECT_VERSION=3.2')
 change('Feather.xcconfig','FEATHER_PRODUCT_BUNDLE_IDENTIFIER=thewonderofyou.Feather','FEATHER_PRODUCT_BUNDLE_IDENTIFIER=ru.ipa95.applestore')
 change('Feather.xcodeproj/project.pbxproj','INFOPLIST_KEY_CFBundleDisplayName = Feather;','INFOPLIST_KEY_CFBundleDisplayName = "Apple Store";',2)
-change('Feather.xcodeproj/project.pbxproj','CURRENT_PROJECT_VERSION = 1;','CURRENT_PROJECT_VERSION = 300;',2)
+change('Feather.xcodeproj/project.pbxproj','CURRENT_PROJECT_VERSION = 1;','CURRENT_PROJECT_VERSION = 302;',2)
+change('Feather.xcodeproj/project.pbxproj','ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;','ASSETCATALOG_COMPILER_APPICON_NAME = AppleStoreIcon;',2)
 
 # Keep the app delegate, heartbeat and file import entry points. Replace its root UI.
 app=source/'Feather/FeatherApp.swift'; text=app.read_text()
@@ -51,8 +52,20 @@ app.write_text(text)
 plist_path=source/'Feather/Resources/Info.plist'; plist=plistlib.loads(plist_path.read_bytes())
 for item in plist['CFBundleURLTypes']:
     item['CFBundleURLSchemes']=['appleipa']; item['CFBundleURLName']='ru.ipa95.applestore'
+# Set both common name keys: signing tools may read either one.
+plist['CFBundleDisplayName'] = 'Apple Store'
+plist['CFBundleName'] = 'Apple Store'
+# Let actool populate the actual iPhone/iPad icon file names for this asset.
 for key in ['CFBundleIcons','CFBundleIcons~ipad']:
-    if key in plist: plist[key].pop('CFBundleAlternateIcons',None)
+    plist[key] = {'CFBundlePrimaryIcon': {'CFBundleIconName': 'AppleStoreIcon'}}
+# Standalone PNG supports tools which cannot extract Assets.car.
+plist['CFBundleIconFile'] = 'AppIcon.png'
+for item in plist.get('CFBundleDocumentTypes', []):
+    item['CFBundleTypeIconFile'] = 'AppleStoreDocument'
+for item in plist.get('CFBundleURLTypes', []):
+    item['CFBundleURLIconFile'] = 'AppleStoreDocument'
+for item in plist.get('UTExportedTypeDeclarations', []):
+    item['UTTypeIconFile'] = 'AppleStoreDocument'
 commit = os.environ.get('GITHUB_SHA', '')
 if len(commit) == 40 and all(c in '0123456789abcdef' for c in commit):
     plist['AppleStoreSourceURL'] = 'https://github.com/Ellai95/apple-store-build/tree/' + commit
@@ -99,7 +112,12 @@ block=s[a:b]
 s=s[:a]+'\t\tawait MainActor.run {\n'+''.join('\t'+line+'\n' for line in block.splitlines())+'\t\t}\n'+s[b:]
 p.write_text(s)
 
-# Remove old icon variants before overlaying a single new production icon.
+# Xcode 26's Icon Composer input overrides the older asset catalog. Removing
+# only AppIcon.appiconset left this Feather icon active in the previous build.
+shutil.rmtree(source/'Feather/Resources/AppIcon.icon')
+shutil.rmtree(source/'Feather/Resources/Icons')
+(source/'Feather/Resources/feather_extension.png').unlink()
+# Remove old icon variants before overlaying the new production artwork.
 for name in ['AppIcon.appiconset','Glyph.imageset']:
     shutil.rmtree(source/'Feather/Resources/Assets.xcassets'/name)
 with tempfile.TemporaryDirectory(prefix='apple-store-overlay-') as directory:
@@ -116,5 +134,5 @@ p=source/'Feather/Resources/Launch Screen.storyboard';s=p.read_text().replace('m
 # Standalone provenance and complete GPL license travel with the app/source artifact.
 (source/'APPLE_STORE_CHANGES.md').write_text((base/'CHANGES.md').read_text())
 (report/'source-commit.txt').write_text(actual+'\n'+subprocess.check_output(['git','-C',str(source),'submodule','status','--recursive'],text=True))
-(report/'customization.txt').write_text('Apple Store 3.0, build 300\n'+(base/'CHANGES.md').read_text())
-print('Apple Store 3.0 applied. 201 catalog entries; 197 IPA links. Ready for Xcode build.')
+(report/'customization.txt').write_text('Apple Store 3.2, build 302\n'+(base/'CHANGES.md').read_text())
+print('Apple Store 3.2 applied. New AppleStoreIcon; display name Apple Store. Ready for Xcode build.')

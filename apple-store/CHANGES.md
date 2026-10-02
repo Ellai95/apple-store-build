@@ -1,3 +1,21 @@
+# Apple Store 3.2 (build 302)
+
+- Fix the missing install model in the bottom progress indicator shown on install.
+- Pass the shared model explicitly to progress rings in the inset, catalog and sheet.
+- Scope catalog/install environment objects around both the tabs and the bottom inset.
+- Add a GitHub macOS SwiftUI render check of the actual indicator in 11 install states,
+  deliberately without an injected environment object.
+- Keep the 3.1 app icon/name fix, signing engine, certificates and catalog.
+
+# Apple Store 3.1 (build 301)
+
+- Replace the app icon with new blue/white artwork in all appearances.
+- Remove the upstream Icon Composer asset which overrode our icon in Xcode 26.
+- Remove old alternate Feather icons and replace the document icon.
+- Fix both bundle name fields to Apple Store and export Apple Store.ipa.
+- Add post-build IPA identity and icon checks.
+- Keep catalog, signing flow, settings and license notices from 3.0.
+
 # Apple Store 3.0 — changes to Feather
 
 Base: claration/Feather, 7078b053c0af262809a48e4d3898d42b0d35fedf.
