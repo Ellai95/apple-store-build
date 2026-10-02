@@ -1,35 +1,34 @@
-# Apple Store 2.0 (build 200)
+# Apple Store 3.0 — changes to Feather
 
-Independent Apple IPA interface on Feather revision 7078b053c0af262809a48e4d3898d42b0d35fedf.
+Base: claration/Feather, 7078b053c0af262809a48e4d3898d42b0d35fedf.
+Customization: Maga Magomadov / Apple IPA, 2026-10-02.
+License: GNU GPL-3.0; original notices and licenses remain included.
 
-- New catalogue-first SwiftUI shell, detail cards, library, settings, certificate import.
-- Light by default; persistent black theme, shared UIKit and SwiftUI appearance.
-- 80 bundled catalogue cards, 76 existing HTTPS R2 IPA URLs, original cached app icons.
-- Search aliases, categories, sort, available-only filter, subscription/contact links.
-- Generated Apple Store icon (original ribbon A; red/blue/pearl palette).
-- Sequential download, import, signing, packaging and system install request.
-- Actual byte progress; explicit handler UUIDs; no "latest signed app" lookup.
-- Download cancellation, HTTP errors, certificate presence/expiry checks, retry.
-- Only one active signing/install operation. Catalogue remains browsable.
-- Preserved Zsign, local installation server, optional IDevice installation, signing settings.
-- Correct main-context database writes for import/sign/certificate registration.
-- Own bundle ID ru.ipa95.applestore, own appleipa URL scheme. Baseline remains separate.
-- Existing Telegram Mini App is not modified.
+3.0 adds a schema-validated HTTPS catalog with a bundled fallback and an atomic
+last-known-good disk snapshot. Catalog metadata, media URLs and contact links
+can change without replacing the app binary. Bad or older remote snapshots
+are rejected. Images use the existing Nuke memory/disk cache.
 
-The native build must be compiled in GitHub Actions, then signed and tested on iPhone.
-Tests of baseline Feather do not constitute testing of these new features.
-The OTA payload-transfer state is deliberately not labelled "installed": iOS owns installation.
-No background-completion guarantee: keep Apple Store open during download/signing.
+There are 201 initial cards: 80 existing cards and 121 additions. The existing
+76 IPA URLs, versions, subscription plans and mod features are retained.
+External data were matched explicitly; full merge/source records accompany
+the owner package. IPA files were not copied or re-signed during preparation.
+New IPA downloads link to the selected public GitHub Releases repository.
 
-## Licenses and source
-Feather and this derivative are distributed under GPL-3.0 (see LICENSE).
-Original copyright notices and licenses remain in source. Zsign/IDeviceKit and other
-packages retain their own licenses. Build workflow uploads complete assembled source
-(including checked-out submodules, excluding .git/builds/secrets) alongside the IPA.
-Original app icons and catalogue metadata retain their respective owners' rights.
+App pages show screenshots, ratings, descriptions, version and known file size.
+Unknown sizes and ratings are omitted. Existing mod capabilities are preserved.
+Requests check the current catalog before offering Telegram/WhatsApp drafts.
+About contains brief product/owner details, with separate working source and
+license entries. Third-party licenses and copyright notices are bundled.
 
-## Icon generation
-Built-in image generation; original full-bleed square asset, no text or fruit logo.
-Prompt: premium app-marketplace icon, sculptural ribbon A, pearl glass-metal surfaces,
-red left and electric-blue right lighting on midnight navy, legible silhouette,
-no rounded external frame. Only standard asset resizing for Xcode was applied.
+The pinned dependency repair, file handlers and install pipeline from 2.0 remain.
+Only a pre-download minimum-iOS check has been added to the install pipeline.
+URL scheme: appleipa. Bundle ID: ru.ipa95.applestore. Version: 3.0, build: 300.
+Source URL is stamped to the customization commit during GitHub Actions builds.
+
+No client certificate or password is uploaded to the catalog host. Requests to
+messengers are opened as drafts; the user sends the message themselves.
+
+Validation: resource/schema/URL checks and Swift syntax checks in preparation;
+Foundation catalog tests and native Xcode compilation run in GitHub Actions.
+Device testing of this new release remains required.

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Apply the Apple Store 2.0 overlay to the pinned, tested Feather revision.
+"""Apply the Apple Store 3.0 overlay to the pinned, tested Feather revision.
 No signing certificates or secrets are required. Run: python3 prepare.py SOURCE.
 """
 from pathlib import Path
-import json, plistlib, shutil, subprocess, sys, tempfile, zipfile
+import json, plistlib, shutil, subprocess, sys, tempfile, zipfile, os
 
 base = Path(__file__).resolve().parent
 source = Path(sys.argv[1]).resolve()
@@ -31,10 +31,10 @@ for p in [p1,p2]: p.write_text(json.dumps(project,indent=2)+'\n')
 change('Makefile','-project Feather.xcodeproj','-workspace Feather.xcworkspace')
 
 # New app identity allows baseline Feather and Apple Store to coexist.
-change('Feather.xcconfig','FEATHER_PROJECT_VERSION=2.9.0','FEATHER_PROJECT_VERSION=2.0')
+change('Feather.xcconfig','FEATHER_PROJECT_VERSION=2.9.0','FEATHER_PROJECT_VERSION=3.0')
 change('Feather.xcconfig','FEATHER_PRODUCT_BUNDLE_IDENTIFIER=thewonderofyou.Feather','FEATHER_PRODUCT_BUNDLE_IDENTIFIER=ru.ipa95.applestore')
 change('Feather.xcodeproj/project.pbxproj','INFOPLIST_KEY_CFBundleDisplayName = Feather;','INFOPLIST_KEY_CFBundleDisplayName = "Apple Store";',2)
-change('Feather.xcodeproj/project.pbxproj','CURRENT_PROJECT_VERSION = 1;','CURRENT_PROJECT_VERSION = 200;',2)
+change('Feather.xcodeproj/project.pbxproj','CURRENT_PROJECT_VERSION = 1;','CURRENT_PROJECT_VERSION = 300;',2)
 
 # Keep the app delegate, heartbeat and file import entry points. Replace its root UI.
 app=source/'Feather/FeatherApp.swift'; text=app.read_text()
@@ -53,6 +53,9 @@ for item in plist['CFBundleURLTypes']:
     item['CFBundleURLSchemes']=['appleipa']; item['CFBundleURLName']='ru.ipa95.applestore'
 for key in ['CFBundleIcons','CFBundleIcons~ipad']:
     if key in plist: plist[key].pop('CFBundleAlternateIcons',None)
+commit = os.environ.get('GITHUB_SHA', '')
+if len(commit) == 40 and all(c in '0123456789abcdef' for c in commit):
+    plist['AppleStoreSourceURL'] = 'https://github.com/Ellai95/apple-store-build/tree/' + commit
 plist_path.write_bytes(plistlib.dumps(plist,sort_keys=False))
 
 # A failed Zsign result must never be moved into the signed library.
@@ -113,5 +116,5 @@ p=source/'Feather/Resources/Launch Screen.storyboard';s=p.read_text().replace('m
 # Standalone provenance and complete GPL license travel with the app/source artifact.
 (source/'APPLE_STORE_CHANGES.md').write_text((base/'CHANGES.md').read_text())
 (report/'source-commit.txt').write_text(actual+'\n'+subprocess.check_output(['git','-C',str(source),'submodule','status','--recursive'],text=True))
-(report/'customization.txt').write_text('Apple Store 2.0, build 200\n'+(base/'CHANGES.md').read_text())
-print('Apple Store 2.0 applied. 80 catalog entries; 76 IPA links. Ready for Xcode build.')
+(report/'customization.txt').write_text('Apple Store 3.0, build 300\n'+(base/'CHANGES.md').read_text())
+print('Apple Store 3.0 applied. 201 catalog entries; 197 IPA links. Ready for Xcode build.')
