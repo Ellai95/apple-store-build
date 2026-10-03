@@ -1,3 +1,10 @@
+# Apple Store 3.2 — packaging correction (archive 8)
+
+- Set PRODUCT_NAME to Apple Store in both configurations so generated CFBundleName is correct.
+- Preserve module/executable identities and align product references.
+- Save metadata before validation and capture stderr in the report.
+- Keep version 3.2 / build 302, UI payload, icon and catalog unchanged.
+
 # Apple Store 3.2 (build 302)
 
 - Fix the missing install model in the bottom progress indicator shown on install.

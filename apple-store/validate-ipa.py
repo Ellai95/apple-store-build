@@ -31,6 +31,11 @@ def check(ipa, source, report):
             'CFBundleShortVersionString': '3.2',
             'CFBundleVersion': '302',
         }
+        # Keep actual metadata even when an assertion fails.
+        (report / 'built-Info.plist').write_bytes(plistlib.dumps(info))
+        actual = {key: info.get(key) for key in expected}
+        actual['CFBundleExecutable'] = info.get('CFBundleExecutable')
+        (report / 'app-identity-actual.json').write_text(json.dumps(actual, indent=2) + '\n')
         for key, value in expected.items():
             assert info.get(key) == value, f'{key}: {info.get(key)!r} != {value!r}'
 
