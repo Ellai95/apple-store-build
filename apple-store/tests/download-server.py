@@ -3,7 +3,7 @@
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from io import BytesIO
-import sys, time, zipfile
+import sys, time, zipfile, subprocess, threading
 buf=BytesIO()
 with zipfile.ZipFile(buf,'w') as archive:
     archive.writestr('Payload/Fixture.app/Info.plist', b'fixture' * 160000)
@@ -23,6 +23,22 @@ class Handler(BaseHTTPRequestHandler):
                 self.wfile.write(body[offset:offset+32768]); self.wfile.flush(); time.sleep(.015)
         except (BrokenPipeError,ConnectionResetError): pass
     def log_message(self,*args): pass
-server=ThreadingHTTPServer(('127.0.0.1',0),Handler)
-Path(sys.argv[1]).write_text(str(server.server_address[1]))
-server.serve_forever()
+def main():
+    binary = Path(sys.argv[1]).resolve()
+    if not binary.is_file():
+        raise SystemExit('Missing compiled downloader test: ' + str(binary))
+    # Bind the socket before launching the test. No polling or port file.
+    with ThreadingHTTPServer(('127.0.0.1', 0), Handler) as server:
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            url = 'http://127.0.0.1:' + str(server.server_address[1])
+            print('Local download fixture ready', flush=True)
+            result = subprocess.run([str(binary), url], timeout=60)
+        finally:
+            server.shutdown()
+            thread.join(timeout=5)
+    return result.returncode
+
+if __name__ == '__main__':
+    sys.exit(main())
