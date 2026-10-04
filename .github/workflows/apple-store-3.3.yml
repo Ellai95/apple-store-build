@@ -1,0 +1,150 @@
+name: Apple Store 3.3
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - name: Checkout Apple Store customization
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          path: customization
+          persist-credentials: false
+
+      - name: Checkout tested Feather base
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: claration/Feather
+          ref: 7078b053c0af262809a48e4d3898d42b0d35fedf
+          submodules: recursive
+          path: source
+          persist-credentials: false
+
+      - name: Select Xcode
+        shell: bash
+        run: |
+          set -euo pipefail
+          for candidate in /Applications/Xcode_26.3.app /Applications/Xcode_26.3.3.app; do
+            if [ -d "$candidate/Contents/Developer" ]; then
+              sudo xcode-select -s "$candidate/Contents/Developer"
+              break
+            fi
+          done
+          mkdir -p source/build-report
+          xcodebuild -version | tee source/build-report/xcode.txt
+          xcrun --sdk iphoneos --show-sdk-version
+          python3 - <<'PY'
+          import re, subprocess
+          text = subprocess.check_output(['xcodebuild', '-version'], text=True)
+          assert tuple(map(int, re.search(r'Xcode (\d+)\.(\d+)', text).groups())) >= (26, 3), 'Xcode 26.3+ required'
+          PY
+
+      - name: Prepare Apple Store 3.3
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -f customization/apple-store/prepare.py ]; then
+            echo 'Upload apple-store folder at repository ROOT, alongside README.md.' | tee source/build-report/prepare.log
+            exit 1
+          fi
+          python3 customization/apple-store/prepare.py source 2>&1 | tee source/build-report/prepare.log
+          python3 customization/apple-store/validate.py source 2>&1 | tee source/build-report/validation.log
+          git -C customization rev-parse HEAD > source/build-report/customization-commit.txt
+          git -C source diff > source/build-report/source-changes.patch
+          xcrun swiftc -frontend -parse source/Feather/AppleStore/*.swift
+          xcrun swiftc -swift-version 5 source/Feather/AppleStore/StoreCatalogData.swift customization/apple-store/tests/main.swift -o source/build-report/catalog-tests
+          source/build-report/catalog-tests source/Feather/Resources/AppleStoreCatalog.json | tee source/build-report/catalog-tests.log
+
+      - name: Check install progress UI without environment injection
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          code = Path('source/Feather/AppleStore/StoreRootView.swift').read_text()
+          start = code.index('struct StoreProgressRing: View {')
+          end = code.index('\nstruct StoreProgressSheet:', start)
+          test = Path('customization/apple-store/tests/ProgressSmoke.swift').read_text()
+          Path('source/build-report/ProgressSmoke.swift').write_text(test + '\n' + code[start:end])
+          PY
+          xcrun swiftc -swift-version 5 -parse-as-library source/build-report/ProgressSmoke.swift -o source/build-report/progress-smoke
+          source/build-report/progress-smoke source/build-report | tee source/build-report/progress-smoke.log
+
+      - name: Check IPA downloader with local HTTP fixtures
+        timeout-minutes: 2
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 customization/apple-store/tests/download-server.py source/build-report/download-port.txt &
+          fixture_pid=$!
+          trap 'kill "$fixture_pid" 2>/dev/null || true' EXIT
+          for attempt in {1..50}; do
+            if [ -s source/build-report/download-port.txt ]; then break; fi
+            sleep 0.1
+          done
+          port=$(cat source/build-report/download-port.txt)
+          xcrun swiftc -swift-version 5 -parse-as-library source/Feather/AppleStore/StoreDownloader.swift customization/apple-store/tests/DownloadSmoke.swift -o source/build-report/download-smoke
+          source/build-report/download-smoke "http://127.0.0.1:$port" | tee source/build-report/download-smoke.log
+
+      - name: Build iPhone IPA
+        working-directory: source
+        shell: bash
+        run: |
+          set -euo pipefail
+          make iphoneos 2>&1 | tee build-report/build.log
+          test -s packages/Feather.ipa
+          unzip -t packages/Feather.ipa
+          python3 ../customization/apple-store/validate-ipa.py packages/Feather.ipa . build-report 2>&1 | tee build-report/ipa-validation.log
+          mv packages/Feather.ipa "packages/Apple Store.ipa"
+          shasum -a 256 "packages/Apple Store.ipa" > build-report/SHA256.txt
+
+      - name: Apple Store IPA
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: Apple-Store-3.3-IPA
+          path: source/packages/Apple Store.ipa
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Prepare corresponding source (GPL)
+        if: success()
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import zipfile
+          root=Path('source')
+          excluded={'.git','_build','packages','deps','build-report'}
+          with zipfile.ZipFile('Apple-Store-3.3-Source.zip','w',zipfile.ZIP_DEFLATED) as z:
+              for p in root.rglob('*'):
+                  rel=p.relative_to(root)
+                  if p.is_file() and not any(part in excluded for part in rel.parts) and rel.name != 'cert.json':
+                      z.write(p,Path('Apple-Store-3.3-Source')/rel)
+              for p in Path('customization/apple-store').rglob('*'):
+                  if p.is_file(): z.write(p,Path('BuildCustomization')/p.relative_to('customization/apple-store'))
+          PY
+
+      - name: Corresponding source
+        if: success()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: Apple-Store-3.3-Source
+          path: Apple-Store-3.3-Source.zip
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Build report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: Apple-Store-3.3-Report
+          path: source/build-report/
+          if-no-files-found: ignore
+          retention-days: 14
