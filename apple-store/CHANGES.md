@@ -1,3 +1,21 @@
+# Apple Store 3.4 (build 304), archive 12
+
+- One-time migration selects Semi Local with localhost for fresh and existing users;
+  subsequent explicit choices and the advanced IDevice method remain available.
+- Report local installer initialization failures instead of swallowing them.
+- Remove the home request banner; keep requests in Settings and empty search.
+- Replace News with the main @appleipa095 channel.
+- License landing page contains only GPL-3.0 and Components/authors; bundled notices,
+  full license and corresponding-source entry in About remain available.
+- Generate a rounded launch-only image from the unchanged original logo at build time.
+- Read and cache R2 IPA sizes when opening a card; HEAD first, header-only GET fallback.
+  Unknown/error responses are never shown as real IPA sizes. No whole IPA is downloaded.
+- Keep the working 3.3 downloader and corrected local CI test runner.
+
+The owner confirmed Semi Local + localhost works on the test iPhone. The 3.4 build
+still needs GitHub compilation and device verification. R2 header requests from the
+preparation environment returned 403, so no fabricated static file sizes are bundled.
+
 # Apple Store 3.3 (build 303) — download repair candidate, archive 9
 
 - Replace per-task async download delegation with an explicit resumed download task

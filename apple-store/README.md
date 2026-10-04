@@ -1,6 +1,6 @@
-# Apple Store 3.3
+# Apple Store 3.4
 
-Version 3.3 (build 303), bundle ID `ru.ipa95.applestore`.
+Version 3.4 (build 304), bundle ID `ru.ipa95.applestore`.
 
 The application is assembled from the exact Feather revision
 `7078b053c0af262809a48e4d3898d42b0d35fedf` and this directory.
@@ -19,7 +19,7 @@ make iphoneos
 ```
 
 Build on macOS with Xcode 26.3 or newer. The workflow in
-`.github/workflows/apple-store-3.3.yml` additionally runs catalog unit tests,
+`.github/workflows/apple-store-3.4.yml` additionally runs catalog unit tests,
 checks the resulting IPA identity, and produces the corresponding source ZIP.
 The catalog endpoint is in `StoreCatalog.swift`; the schema and validator are
 in `StoreCatalogData.swift`. The catalog can be edited independently of IPA.
@@ -29,7 +29,7 @@ source alongside any distributed IPA. Do not rely on expiring Actions artifacts
 as the only source distribution. No signing keys are needed to build.
 
 The public display name and bundle name are always `Apple Store`. The workflow
-exports `Apple Store.ipa`; version 3.3 is metadata, not part of the app name.
+exports `Apple Store.ipa`; version 3.4 is metadata, not part of the app name.
 The legacy Feather Icon Composer file and alternate PNGs are removed.
 `AppleStoreIcon` is the single active icon asset in every appearance.
 `validate-ipa.py` checks the actual compiled icon metadata and preview PNG.

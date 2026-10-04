@@ -41,8 +41,8 @@ assert 'PRODUCT_NAME = "$(TARGET_NAME)";' not in project
 assert 'path = "Apple Store.app";' in project
 scheme = (root/'Feather.xcodeproj/xcshareddata/xcschemes/Feather.xcscheme').read_text()
 assert scheme.count('BuildableName = "Apple Store.app"') == 3
-assert project.count('CURRENT_PROJECT_VERSION = 303;')==2
-assert 'FEATHER_PROJECT_VERSION=3.3' in (root/'Feather.xcconfig').read_text()
+assert project.count('CURRENT_PROJECT_VERSION = 304;')==2
+assert 'FEATHER_PROJECT_VERSION=3.4' in (root/'Feather.xcconfig').read_text()
 assert 'FEATHER_PRODUCT_BUNDLE_IDENTIFIER=ru.ipa95.applestore' in (root/'Feather.xcconfig').read_text()
 plist=plistlib.loads((resources/'Info.plist').read_bytes())
 assert plist['CFBundleURLTypes'][0]['CFBundleURLSchemes']==['appleipa']
@@ -67,3 +67,19 @@ assert '@AppStorage("AppleStore.darkTheme") private var dark = false' in (root/'
 assert (resources/'AppleStoreNotices.txt').stat().st_size > 1000
 print('PASS: catalog, URLs, resources, identity, dependency locks, root view and pipeline integration.')
 print('Native compilation and on-device verification are required for the new UI/pipeline.')
+
+assert project.count('INFOPLIST_KEY_UILaunchStoryboardName = AppleStoreLaunch34;') == 2
+assert plist['UILaunchStoryboardName'] == 'AppleStoreLaunch34'
+assert (resources/'AppleStoreLaunch34.storyboard').is_file()
+settings=(root/'Feather/AppleStore/StoreSettingsView.swift').read_text()
+licenses=settings.split('struct StoreLicensesView: View {',1)[1]
+assert licenses.count('NavigationLink(')==2
+assert 'Apple Store распространяется' not in licenses and 'Link("Feather' not in licenses
+assert 'Наш канал в Телеграм' in settings and 'https://t.me/appipastore' not in settings
+catalog_view=(root/'Feather/AppleStore/StoreCatalogView.swift').read_text()
+assert 'requestBanner' not in catalog_view
+assert 'init() { StoreInstallationDefaults.apply() }' in pipeline
+server=(root/'Feather/Backend/Server/ServerInstaller.swift').read_text()
+assert 'self._server = try setupApp(port: port)' in server
+assert 'self._server = try? setupApp' not in server
+print('PASS: install migration hook, server errors, launch wiring, channel and simplified licenses.')

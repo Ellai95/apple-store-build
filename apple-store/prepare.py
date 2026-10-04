@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Apply the Apple Store 3.3 overlay to the pinned, tested Feather revision.
+"""Apply the Apple Store 3.4 overlay to the pinned, tested Feather revision.
 No signing certificates or secrets are required. Run: python3 prepare.py SOURCE.
 """
 from pathlib import Path
@@ -31,7 +31,7 @@ for p in [p1,p2]: p.write_text(json.dumps(project,indent=2)+'\n')
 change('Makefile','-project Feather.xcodeproj','-workspace Feather.xcworkspace')
 
 # New app identity allows baseline Feather and Apple Store to coexist.
-change('Feather.xcconfig','FEATHER_PROJECT_VERSION=2.9.0','FEATHER_PROJECT_VERSION=3.3')
+change('Feather.xcconfig','FEATHER_PROJECT_VERSION=2.9.0','FEATHER_PROJECT_VERSION=3.4')
 change('Feather.xcconfig','FEATHER_PRODUCT_BUNDLE_IDENTIFIER=thewonderofyou.Feather','FEATHER_PRODUCT_BUNDLE_IDENTIFIER=ru.ipa95.applestore')
 change('Feather.xcodeproj/project.pbxproj','INFOPLIST_KEY_CFBundleDisplayName = Feather;','INFOPLIST_KEY_CFBundleDisplayName = "Apple Store";',2)
 # Generated Info.plist gets CFBundleName from PRODUCT_NAME.
@@ -41,7 +41,7 @@ change('Feather.xcodeproj/project.pbxproj','PRODUCT_NAME = "$(TARGET_NAME)";',
 change('Feather.xcodeproj/project.pbxproj','path = Feather.app;','path = "Apple Store.app";')
 change('Feather.xcodeproj/xcshareddata/xcschemes/Feather.xcscheme',
        'BuildableName = "Feather.app"','BuildableName = "Apple Store.app"',3)
-change('Feather.xcodeproj/project.pbxproj','CURRENT_PROJECT_VERSION = 1;','CURRENT_PROJECT_VERSION = 303;',2)
+change('Feather.xcodeproj/project.pbxproj','CURRENT_PROJECT_VERSION = 1;','CURRENT_PROJECT_VERSION = 304;',2)
 change('Feather.xcodeproj/project.pbxproj','ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;','ASSETCATALOG_COMPILER_APPICON_NAME = AppleStoreIcon;',2)
 
 # Keep the app delegate, heartbeat and file import entry points. Replace its root UI.
@@ -124,6 +124,10 @@ p.write_text(s)
 shutil.rmtree(source/'Feather/Resources/AppIcon.icon')
 shutil.rmtree(source/'Feather/Resources/Icons')
 (source/'Feather/Resources/feather_extension.png').unlink()
+# Do not swallow a local server startup failure and wait forever for installation.
+change('Feather/Backend/Server/ServerInstaller.swift',
+       'self._server = try? setupApp(port: port)', 'self._server = try setupApp(port: port)')
+
 # Remove old icon variants before overlaying the new production artwork.
 for name in ['AppIcon.appiconset','Glyph.imageset']:
     shutil.rmtree(source/'Feather/Resources/Assets.xcassets'/name)
@@ -138,8 +142,18 @@ with tempfile.TemporaryDirectory(prefix='apple-store-overlay-') as directory:
 # Launch-screen emblem uses a square aspect ratio.
 p=source/'Feather/Resources/Launch Screen.storyboard';s=p.read_text().replace('multiplier="31:21"','multiplier="1:1"').replace('constant="155"','constant="105"');p.write_text(s)
 
+change('Feather.xcodeproj/project.pbxproj',
+       'INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen.storyboard";',
+       'INFOPLIST_KEY_UILaunchStoryboardName = AppleStoreLaunch34;',2)
+# New launch resource name for this release, using the clipped Glyph prepared by CI.
+launch=source/'Feather/Resources/Launch Screen.storyboard'
+launch.rename(source/'Feather/Resources/AppleStoreLaunch34.storyboard')
+info=source/'Feather/Resources/Info.plist'
+data=plistlib.loads(info.read_bytes());data['UILaunchStoryboardName']='AppleStoreLaunch34'
+info.write_bytes(plistlib.dumps(data,sort_keys=False))
+
 # Standalone provenance and complete GPL license travel with the app/source artifact.
 (source/'APPLE_STORE_CHANGES.md').write_text((base/'CHANGES.md').read_text())
 (report/'source-commit.txt').write_text(actual+'\n'+subprocess.check_output(['git','-C',str(source),'submodule','status','--recursive'],text=True))
-(report/'customization.txt').write_text('Apple Store 3.3, build 303\n'+(base/'CHANGES.md').read_text())
-print('Apple Store 3.3 applied. New AppleStoreIcon; display name Apple Store. Ready for Xcode build.')
+(report/'customization.txt').write_text('Apple Store 3.4, build 304\n'+(base/'CHANGES.md').read_text())
+print('Apple Store 3.4 applied. New AppleStoreIcon; display name Apple Store. Ready for Xcode build.')
