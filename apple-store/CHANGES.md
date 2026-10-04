@@ -1,3 +1,18 @@
+# Apple Store 3.3 (build 303) — download repair candidate, archive 9
+
+- Replace per-task async download delegation with an explicit resumed download task
+  and a retained session delegate, following the upstream downloader approach.
+- Serialize progress, completion, cancellation and watchdog state on one queue.
+- Report no-data timeout after 45 seconds, stalled transfer after 90 seconds,
+  HTTP/network errors and invalid IPA responses instead of an indefinite spinner.
+- Move the temporary IPA before the download callback returns.
+- Add CI tests for success, redirects, unknown size, HTTP 403, invalid data,
+  first-byte timeout, cancellation before/during transfer and a subsequent retry.
+- Retain the icon, bundle-name and progress UI fixes from 3.2.
+
+The original device-specific root cause is not yet proven. Native compilation
+and the transport tests run on macOS GitHub Actions; iPhone verification is required.
+
 # Apple Store 3.2 — packaging correction (archive 8)
 
 - Set PRODUCT_NAME to Apple Store in both configurations so generated CFBundleName is correct.

@@ -41,8 +41,8 @@ assert 'PRODUCT_NAME = "$(TARGET_NAME)";' not in project
 assert 'path = "Apple Store.app";' in project
 scheme = (root/'Feather.xcodeproj/xcshareddata/xcschemes/Feather.xcscheme').read_text()
 assert scheme.count('BuildableName = "Apple Store.app"') == 3
-assert project.count('CURRENT_PROJECT_VERSION = 302;')==2
-assert 'FEATHER_PROJECT_VERSION=3.2' in (root/'Feather.xcconfig').read_text()
+assert project.count('CURRENT_PROJECT_VERSION = 303;')==2
+assert 'FEATHER_PROJECT_VERSION=3.3' in (root/'Feather.xcconfig').read_text()
 assert 'FEATHER_PRODUCT_BUNDLE_IDENTIFIER=ru.ipa95.applestore' in (root/'Feather.xcconfig').read_text()
 plist=plistlib.loads((resources/'Info.plist').read_bytes())
 assert plist['CFBundleURLTypes'][0]['CFBundleURLSchemes']==['appleipa']
@@ -59,7 +59,9 @@ p2=json.loads((root/'Feather.xcworkspace/xcshareddata/swiftpm/Package.resolved')
 assert p1==p2 and len(p1['pins'])==28
 pipeline=(root/'Feather/AppleStore/StorePipeline.swift').read_text()
 assert 'uuid == %@' in pipeline and 'storeResultUUID' in pipeline
-assert 'http.statusCode' in pipeline and 'Task.checkCancellation()' in pipeline
+assert 'Task.checkCancellation()' in pipeline
+downloader=(root/'Feather/AppleStore/StoreDownloader.swift').read_text()
+assert 'response.statusCode' in downloader and 'session.downloadTask(with: url).resume()' in downloader
 assert 'case .handedOff' in pipeline
 assert '@AppStorage("AppleStore.darkTheme") private var dark = false' in (root/'Feather/AppleStore/StoreRootView.swift').read_text()
 assert (resources/'AppleStoreNotices.txt').stat().st_size > 1000
