@@ -81,16 +81,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python3 customization/apple-store/tests/download-server.py source/build-report/download-port.txt &
-          fixture_pid=$!
-          trap 'kill "$fixture_pid" 2>/dev/null || true' EXIT
-          for attempt in {1..50}; do
-            if [ -s source/build-report/download-port.txt ]; then break; fi
-            sleep 0.1
-          done
-          port=$(cat source/build-report/download-port.txt)
+          mkdir -p source/build-report
           xcrun swiftc -swift-version 5 -parse-as-library source/Feather/AppleStore/StoreDownloader.swift customization/apple-store/tests/DownloadSmoke.swift -o source/build-report/download-smoke
-          source/build-report/download-smoke "http://127.0.0.1:$port" | tee source/build-report/download-smoke.log
+          python3 -u customization/apple-store/tests/download-server.py source/build-report/download-smoke 2>&1 | tee source/build-report/download-smoke.log
 
       - name: Build iPhone IPA
         working-directory: source
