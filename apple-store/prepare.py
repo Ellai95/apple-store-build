@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Apply the Apple Store 3.4 overlay to the pinned, tested Feather revision.
+"""Apply the Apple Store 3.6 overlay to the pinned, tested Feather revision.
 No signing certificates or secrets are required. Run: python3 prepare.py SOURCE.
 """
 from pathlib import Path
@@ -31,7 +31,7 @@ for p in [p1,p2]: p.write_text(json.dumps(project,indent=2)+'\n')
 change('Makefile','-project Feather.xcodeproj','-workspace Feather.xcworkspace')
 
 # New app identity allows baseline Feather and Apple Store to coexist.
-change('Feather.xcconfig','FEATHER_PROJECT_VERSION=2.9.0','FEATHER_PROJECT_VERSION=3.4')
+change('Feather.xcconfig','FEATHER_PROJECT_VERSION=2.9.0','FEATHER_PROJECT_VERSION=3.6')
 change('Feather.xcconfig','FEATHER_PRODUCT_BUNDLE_IDENTIFIER=thewonderofyou.Feather','FEATHER_PRODUCT_BUNDLE_IDENTIFIER=ru.ipa95.applestore')
 change('Feather.xcodeproj/project.pbxproj','INFOPLIST_KEY_CFBundleDisplayName = Feather;','INFOPLIST_KEY_CFBundleDisplayName = "Apple Store";',2)
 # Generated Info.plist gets CFBundleName from PRODUCT_NAME.
@@ -41,7 +41,7 @@ change('Feather.xcodeproj/project.pbxproj','PRODUCT_NAME = "$(TARGET_NAME)";',
 change('Feather.xcodeproj/project.pbxproj','path = Feather.app;','path = "Apple Store.app";')
 change('Feather.xcodeproj/xcshareddata/xcschemes/Feather.xcscheme',
        'BuildableName = "Feather.app"','BuildableName = "Apple Store.app"',3)
-change('Feather.xcodeproj/project.pbxproj','CURRENT_PROJECT_VERSION = 1;','CURRENT_PROJECT_VERSION = 304;',2)
+change('Feather.xcodeproj/project.pbxproj','CURRENT_PROJECT_VERSION = 1;','CURRENT_PROJECT_VERSION = 306;',2)
 change('Feather.xcodeproj/project.pbxproj','ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;','ASSETCATALOG_COMPILER_APPICON_NAME = AppleStoreIcon;',2)
 
 # Keep the app delegate, heartbeat and file import entry points. Replace its root UI.
@@ -128,6 +128,19 @@ shutil.rmtree(source/'Feather/Resources/Icons')
 change('Feather/Backend/Server/ServerInstaller.swift',
        'self._server = try? setupApp(port: port)', 'self._server = try setupApp(port: port)')
 
+# Track full payload delivery and concurrent Range requests before cleanup.
+change('Feather/Backend/Server/ServerInstaller.swift',
+       'var packageUrl: URL?', 'let storeTransfers = StorePayloadTransfers()\n\tvar packageUrl: URL?')
+change('Feather/Backend/Server/ServerInstaller.swift',
+       'self._updateStatus(.sendingPayload)',
+       'let attributes = try? FileManager.default.attributesOfItem(atPath: packageUrl.path)\n                let total = (attributes?[.size] as? NSNumber)?.int64Value ?? 0\n                if req.method == .HEAD {\n                    return Response(status: .ok, headers: ["Content-Length": String(total), "Content-Type": "application/octet-stream"])\n                }\n                // The installer URL is private to this operation. Force a body on retries;\n                // a 304 response does not transfer the archive or invoke stream completion.\n                req.headers.remove(name: .ifNoneMatch)\n                guard let bytes = StorePayloadTransfers.bytes(range: req.headers.first(name: .range), total: total, isGET: req.method == .GET) else { return Response(status: .badRequest) }\n                guard self.storeTransfers.begin() else { return Response(status: .gone) }\n                self._updateStatus(.sendingPayload)')
+change('Feather/Backend/Server/ServerInstaller.swift',
+       'self._updateStatus(.installing)',
+       'if self.storeTransfers.finish(success: true, bytes: bytes, total: total) { self._updateStatus(.installing) }')
+change('Feather/Backend/Server/ServerInstaller.swift',
+       'self._updateStatus(.broken(error))',
+       '_ = self.storeTransfers.finish(success: false, bytes: nil, total: total)\n\t\t\t\t\t\tself._updateStatus(.broken(error))')
+
 # Remove old icon variants before overlaying the new production artwork.
 for name in ['AppIcon.appiconset','Glyph.imageset']:
     shutil.rmtree(source/'Feather/Resources/Assets.xcassets'/name)
@@ -155,5 +168,5 @@ info.write_bytes(plistlib.dumps(data,sort_keys=False))
 # Standalone provenance and complete GPL license travel with the app/source artifact.
 (source/'APPLE_STORE_CHANGES.md').write_text((base/'CHANGES.md').read_text())
 (report/'source-commit.txt').write_text(actual+'\n'+subprocess.check_output(['git','-C',str(source),'submodule','status','--recursive'],text=True))
-(report/'customization.txt').write_text('Apple Store 3.4, build 304\n'+(base/'CHANGES.md').read_text())
-print('Apple Store 3.4 applied. New AppleStoreIcon; display name Apple Store. Ready for Xcode build.')
+(report/'customization.txt').write_text('Apple Store 3.6, build 306\n'+(base/'CHANGES.md').read_text())
+print('Apple Store 3.6 applied. New AppleStoreIcon; display name Apple Store. Ready for Xcode build.')

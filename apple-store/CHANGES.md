@@ -1,3 +1,25 @@
+# Apple Store 3.6 (build 306), archive 14
+
+- Default-on per-operation cleanup with a visible Settings toggle.
+- Preserve library copies on errors before full HTTP handoff or IDevice success.
+- Remove current operation's imported/signed copies after full HTTP delivery;
+  retain the independent IPA and immutable manifest metadata for five-minute retries.
+- Track full/ranged/concurrent payload reads under a lock; never retire active streams.
+- Recover only recorded completed temporary archives on next cold launch.
+- Remove the packaging working Payload after its independent archive is complete.
+- Native, concise versioned changelog in About; retain 3.5 visibility switches.
+- Add cleanup safety fixtures to macOS CI. Xcode/device validation still required.
+
+# Apple Store 3.5 (build 305), archive 13
+
+- Hide the installation/signing options card using a source visibility flag.
+- Hide the source-code link in About using a separate source visibility flag.
+- Retain all destinations, URL generation, underlying screens and stored options.
+- Keep the 3.4 installation defaults, sizes, artwork, catalog and license files.
+
+To show them again, set advancedOptions and/or sourceLink to true in
+StoreSettingsView.swift and rebuild. No removal or recreation of screens is needed.
+
 # Apple Store 3.4 (build 304), archive 12
 
 - One-time migration selects Semi Local with localhost for fresh and existing users;

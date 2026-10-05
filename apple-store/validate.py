@@ -41,8 +41,8 @@ assert 'PRODUCT_NAME = "$(TARGET_NAME)";' not in project
 assert 'path = "Apple Store.app";' in project
 scheme = (root/'Feather.xcodeproj/xcshareddata/xcschemes/Feather.xcscheme').read_text()
 assert scheme.count('BuildableName = "Apple Store.app"') == 3
-assert project.count('CURRENT_PROJECT_VERSION = 304;')==2
-assert 'FEATHER_PROJECT_VERSION=3.4' in (root/'Feather.xcconfig').read_text()
+assert project.count('CURRENT_PROJECT_VERSION = 306;')==2
+assert 'FEATHER_PROJECT_VERSION=3.6' in (root/'Feather.xcconfig').read_text()
 assert 'FEATHER_PRODUCT_BUNDLE_IDENTIFIER=ru.ipa95.applestore' in (root/'Feather.xcconfig').read_text()
 plist=plistlib.loads((resources/'Info.plist').read_bytes())
 assert plist['CFBundleURLTypes'][0]['CFBundleURLSchemes']==['appleipa']
@@ -78,8 +78,20 @@ assert 'Apple Store распространяется' not in licenses and 'Link(
 assert 'Наш канал в Телеграм' in settings and 'https://t.me/appipastore' not in settings
 catalog_view=(root/'Feather/AppleStore/StoreCatalogView.swift').read_text()
 assert 'requestBanner' not in catalog_view
-assert 'init() { StoreInstallationDefaults.apply() }' in pipeline
+assert 'StoreInstallationDefaults.apply()' in pipeline and 'cleanupJournal.recoverCompletedHandoffs()' in pipeline
 server=(root/'Feather/Backend/Server/ServerInstaller.swift').read_text()
 assert 'self._server = try setupApp(port: port)' in server
 assert 'self._server = try? setupApp' not in server
 print('PASS: install migration hook, server errors, launch wiring, channel and simplified licenses.')
+
+assert 'StoreSettingsVisibility.advancedOptions' in settings and 'static let advancedOptions = false' in settings
+assert 'static let sourceLink = false' in settings
+assert '@AppStorage("AppleStore.autoCleanup") private var autoCleanup = true' in settings
+assert 'struct StoreChangelogView: View' in settings and 'Версия 3.6' in settings
+assert 'StoreInstallAppSnapshot(app)' in pipeline
+assert 'storeTransfers.closeAfterCompleteTransfer()' in pipeline
+assert 'StorePayloadTransfers.bytes' in server
+assert 'storeTransfers.finish(success: false' in server
+assert 'if !cleanupEnabled, options.post_deleteAppAfterSigned' in pipeline
+assert (root/'Feather/AppleStore/StoreCleanup.swift').is_file()
+print('PASS: cleanup wiring, old-option compatibility, archive retirement, metadata snapshot, changelog and settings visibility.')
