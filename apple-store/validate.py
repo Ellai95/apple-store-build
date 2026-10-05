@@ -101,3 +101,11 @@ assert 'AppleStoreSourceURL' not in plist
 assert 'STRIP_INSTALLED_PRODUCT = YES;' in project
 assert 'StoreVault.catalogData()' in (root/'Feather/AppleStore/StoreCatalog.swift').read_text()
 print('PASS: hidden source/license screens, explicit release stripping and resource loader integration.')
+
+# Catch forgotten literal addresses before the costly native build.
+for path in (root/'Feather/AppleStore').glob('*.swift'):
+    for marker in ['pub-d11175355ab34b9299fb0a916702bce7.r2.dev', 'https://github.com/Ellai95/apple-store-build']:
+        assert marker not in path.read_text(), f'Plaintext protected address in source: {path.name}'
+size_source=(root/'Feather/AppleStore/StoreFileSizes.swift').read_text()
+assert 'url.host == StoreVault.url("catalog").host' in size_source
+print('PASS: no literal protected addresses in own Swift sources; size probe retains host restriction.')

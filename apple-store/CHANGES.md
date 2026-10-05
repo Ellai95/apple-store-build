@@ -1,3 +1,11 @@
+# Packaging fix (16), Apple Store 3.7 / build 307
+
+- The R2 size-probe host now comes from the protected catalog endpoint.
+- Disabled source-link fallback also reads from the protected resource.
+- Early own-source marker validation added; final IPA audit stays enabled.
+- Audit failures identify the marker category as well as the packaged file.
+- No app data migration, catalog URL, icon or signing/install pipeline change.
+
 # Apple Store 3.7 — build 307
 
 Changes by Maga Magomadov, 2026-10-05. Based on Feather, GNU GPL-3.0.

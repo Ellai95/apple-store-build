@@ -14,8 +14,8 @@ def check(ipa, report):
     secret_patterns = [rb'\b[0-9]{8,12}:[A-Za-z0-9_-]{35}\b',
                        rb'\bghp_[A-Za-z0-9]{36}\b', rb'\bgithub_pat_[A-Za-z0-9_]{70,}\b',
                        rb'\bAKIA[A-Z0-9]{16}\b']
-    clear_addresses = ['https://github.com/Ellai95/apple-store-build',
-                       'pub-d11175355ab34b9299fb0a916702bce7.r2.dev']
+    clear_addresses = {'source-repository': 'https://github.com/Ellai95/apple-store-build',
+                       'r2-host': 'pub-d11175355ab34b9299fb0a916702bce7.r2.dev'}
     findings = []
     with zipfile.ZipFile(ipa) as z:
         names = z.namelist()
@@ -37,9 +37,9 @@ def check(ipa, report):
             # installation transport, not a customer's signing private key.
             if any(re.search(pattern, data) for pattern in secret_patterns):
                 findings.append('Credential-like data in: ' + item.filename)
-            for address in clear_addresses:
+            for label, address in clear_addresses.items():
                 if any(address.encode(encoding) in data for encoding in ['utf-8', 'utf-16-le']):
-                    findings.append('Plaintext protected address in: ' + item.filename)
+                    findings.append('Plaintext protected address (' + label + ') in: ' + item.filename)
         result = {'version': info.get('CFBundleShortVersionString'),
                   'sha256': hashlib.sha256(Path(ipa).read_bytes()).hexdigest(),
                   'checkedFiles': len(names), 'findings': sorted(set(findings)),

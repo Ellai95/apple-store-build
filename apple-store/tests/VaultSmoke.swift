@@ -13,6 +13,7 @@ import Foundation
         let decoded = try StoreCatalogDocument.decode(catalog)
         guard decoded.apps.map(\.id) == original.apps.map(\.id), decoded.apps.map(\.ipaUrl) == original.apps.map(\.ipaUrl) else { fatalError("Catalog changed") }
         guard StoreVault.url("catalog").path == "/apple-store/catalog.json",
+              StoreVault.url("catalog").host == "pub-d11175355ab34b9299fb0a916702bce7.r2.dev",
               StoreLinks.support.absoluteString == "https://t.me/ellai95",
               StoreContacts.fallback.whatsapp == "https://wa.me/79667202220",
               StoreVault.text("AppleStoreLicense").contains("GNU GENERAL PUBLIC LICENSE") else { fatalError("Resource contents missing") }

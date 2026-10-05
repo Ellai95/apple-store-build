@@ -26,6 +26,7 @@ with tempfile.TemporaryDirectory() as tmp:
         ('AppleStoreCatalog.json',b'{}'),('private.p12',b'test'),
         ('Implementation.swift',b'import Foundation'),
         ('notes.txt',b'https://github.com/Ellai95/apple-store-build'),
+        ('binary-marker',b'prefix\0pub-d11175355ab34b9299fb0a916702bce7.r2.dev\0suffix'),
         ('token.txt',b'1234567890:'+b'A'*35),
         ('Debug.dSYM/Contents/Resources/DWARF/AppleStore',b'test')
     ]:
