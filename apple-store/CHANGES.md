@@ -1,3 +1,16 @@
+# Apple Store 3.7 — build 307
+
+Changes by Maga Magomadov, 2026-10-05. Based on Feather, GNU GPL-3.0.
+
+- Release UI excludes Source Code and Licenses navigation at compilation time.
+- Bundled catalog, contacts and notices use authenticated AES-GCM resource packaging.
+- Cached catalog is encrypted; the previous JSON cache migrates after a successful write.
+- Executable and Payload folder are named AppleStore. Swift/Core Data module identities remain compatible.
+- Explicit Release stripping, selected plaintext/credential checks and separate publication licenses.
+- No certificate lock, debugger termination, jailbreak detection or runtime ban on re-signing.
+- Encryption keys are embedded, so this is resistance to casual inspection, not secrecy from reverse engineering.
+- Source and attribution remain available in the corresponding source/publication archives.
+
 # Apple Store 3.6 (build 306), archive 14
 
 - Default-on per-operation cleanup with a visible Settings toggle.

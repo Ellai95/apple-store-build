@@ -3,6 +3,9 @@ import Foundation
 func expect(_ condition: @autoclosure () -> Bool, _ message: String) {
     if !condition() { fatalError(message) }
 }
+#if STORE_VAULT_TESTS
+StoreVault.testResourceURL = URL(fileURLWithPath: CommandLine.arguments[2])
+#endif
 let path = CommandLine.arguments[1]
 let data = try Data(contentsOf: URL(fileURLWithPath: path))
 let doc = try StoreCatalogDocument.decode(data)

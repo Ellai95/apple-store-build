@@ -36,13 +36,13 @@ assert project.count('INFOPLIST_KEY_CFBundleDisplayName = "Apple Store";')==2
 assert project.count('ASSETCATALOG_COMPILER_APPICON_NAME = AppleStoreIcon;')==2
 assert project.count('PRODUCT_NAME = "Apple Store";') == 2
 assert project.count('PRODUCT_MODULE_NAME = Feather;') == 2
-assert project.count('EXECUTABLE_NAME = Feather;') == 2
+assert project.count('EXECUTABLE_NAME = AppleStore;') == 2
 assert 'PRODUCT_NAME = "$(TARGET_NAME)";' not in project
 assert 'path = "Apple Store.app";' in project
 scheme = (root/'Feather.xcodeproj/xcshareddata/xcschemes/Feather.xcscheme').read_text()
 assert scheme.count('BuildableName = "Apple Store.app"') == 3
-assert project.count('CURRENT_PROJECT_VERSION = 306;')==2
-assert 'FEATHER_PROJECT_VERSION=3.6' in (root/'Feather.xcconfig').read_text()
+assert project.count('CURRENT_PROJECT_VERSION = 307;')==2
+assert 'FEATHER_PROJECT_VERSION=3.7' in (root/'Feather.xcconfig').read_text()
 assert 'FEATHER_PRODUCT_BUNDLE_IDENTIFIER=ru.ipa95.applestore' in (root/'Feather.xcconfig').read_text()
 plist=plistlib.loads((resources/'Info.plist').read_bytes())
 assert plist['CFBundleURLTypes'][0]['CFBundleURLSchemes']==['appleipa']
@@ -87,7 +87,7 @@ print('PASS: install migration hook, server errors, launch wiring, channel and s
 assert 'StoreSettingsVisibility.advancedOptions' in settings and 'static let advancedOptions = false' in settings
 assert 'static let sourceLink = false' in settings
 assert '@AppStorage("AppleStore.autoCleanup") private var autoCleanup = true' in settings
-assert 'struct StoreChangelogView: View' in settings and 'Версия 3.6' in settings
+assert 'struct StoreChangelogView: View' in settings and 'Версия 3.7' in settings
 assert 'StoreInstallAppSnapshot(app)' in pipeline
 assert 'storeTransfers.closeAfterCompleteTransfer()' in pipeline
 assert 'StorePayloadTransfers.bytes' in server
@@ -95,3 +95,9 @@ assert 'storeTransfers.finish(success: false' in server
 assert 'if !cleanupEnabled, options.post_deleteAppAfterSigned' in pipeline
 assert (root/'Feather/AppleStore/StoreCleanup.swift').is_file()
 print('PASS: cleanup wiring, old-option compatibility, archive retirement, metadata snapshot, changelog and settings visibility.')
+
+assert 'APPLE_STORE_LEGAL_SCREEN || APPLE_STORE_SOURCE_LINK' in settings
+assert 'AppleStoreSourceURL' not in plist
+assert 'STRIP_INSTALLED_PRODUCT = YES;' in project
+assert 'StoreVault.catalogData()' in (root/'Feather/AppleStore/StoreCatalog.swift').read_text()
+print('PASS: hidden source/license screens, explicit release stripping and resource loader integration.')

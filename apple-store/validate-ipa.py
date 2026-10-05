@@ -28,8 +28,9 @@ def check(ipa, source, report):
             'CFBundleDisplayName': 'Apple Store',
             'CFBundleName': 'Apple Store',
             'CFBundleIdentifier': 'ru.ipa95.applestore',
-            'CFBundleShortVersionString': '3.6',
-            'CFBundleVersion': '306',
+            'CFBundleShortVersionString': '3.7',
+            'CFBundleVersion': '307',
+            'CFBundleExecutable': 'AppleStore',
             'UILaunchStoryboardName': 'AppleStoreLaunch34',
         }
         # Keep actual metadata even when an assertion fails.
@@ -79,7 +80,7 @@ def check(ipa, source, report):
                   'iconSHA256': hashlib.sha256(preview).hexdigest(),
                   'compiledIcons': sorted(compiled), 'oldIconResources': False}
         (report / 'app-identity.json').write_text(json.dumps(result, indent=2) + '\n')
-        print('PASS: Apple Store name, version 3.6, new compiled icon and installer PNG; no old icon resources.')
+        print('PASS: Apple Store name, version 3.7, new compiled icon and installer PNG; no old icon resources.')
 
 
 if __name__ == '__main__':
