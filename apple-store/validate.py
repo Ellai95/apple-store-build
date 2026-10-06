@@ -41,7 +41,7 @@ assert 'PRODUCT_NAME = "$(TARGET_NAME)";' not in project
 assert 'path = "Apple Store.app";' in project
 scheme = (root/'Feather.xcodeproj/xcshareddata/xcschemes/Feather.xcscheme').read_text()
 assert scheme.count('BuildableName = "Apple Store.app"') == 3
-assert project.count('CURRENT_PROJECT_VERSION = 308;')==2
+assert project.count('CURRENT_PROJECT_VERSION = 309;')==2
 assert 'FEATHER_PROJECT_VERSION=3.8' in (root/'Feather.xcconfig').read_text()
 assert 'FEATHER_PRODUCT_BUNDLE_IDENTIFIER=ru.ipa95.applestore' in (root/'Feather.xcconfig').read_text()
 plist=plistlib.loads((resources/'Info.plist').read_bytes())
@@ -114,9 +114,19 @@ assert 'func start(_ app: StoreApp) { startCatalog(app, bundleID: nil) }' in pip
 assert 'OptionsManager.shared.options =' not in pipeline
 assert 'options.appIdentifier = customBundleID' in pipeline
 assert 'signed.identifier != customBundleID' in pipeline
-assert 'signLocal(source, bundleID: customBundleID)' in pipeline
+assert 'signLocal(source, bundleID: customBundleID, ownsSource: retryOwnsSource)' in pipeline
 assert 'startCatalog(app, bundleID: customBundleID)' in pipeline
 library=(root/'Feather/AppleStore/StoreLibraryView.swift').read_text()
 assert 'Изменить Bundle ID' in library and 'onDismiss: installBundleRequest' in library
 assert 'startWithBundleID' not in catalog_view
 print('PASS: Library-only Bundle ID flow, unchanged catalog entry, isolated options and retry identity.')
+
+bundle_view=(root/'Feather/AppleStore/StoreBundleIDView.swift').read_text()
+assert 'StoreBundleID.suggested' not in bundle_view
+assert 'StoreBundleID.original(in: directory)' in bundle_view
+assert 'identifier = original' in bundle_view
+assert 'preparation.request(identifier)' in bundle_view
+assert 'StoreBundleRequest(selection: .local(app)' in bundle_view
+assert 'ownsSource: request.ownsSource' in library
+assert r'Bundle ID: \(pattern)' in pipeline
+print('PASS: original IPA identity, local prepared-file handoff, cancellation cleanup and visible profile scope.')

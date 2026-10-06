@@ -42,7 +42,7 @@ change('Feather.xcodeproj/project.pbxproj','PRODUCT_NAME = "$(TARGET_NAME)";',
 change('Feather.xcodeproj/project.pbxproj','path = Feather.app;','path = "Apple Store.app";')
 change('Feather.xcodeproj/xcshareddata/xcschemes/Feather.xcscheme',
        'BuildableName = "Feather.app"','BuildableName = "Apple Store.app"',3)
-change('Feather.xcodeproj/project.pbxproj','CURRENT_PROJECT_VERSION = 1;','CURRENT_PROJECT_VERSION = 308;',2)
+change('Feather.xcodeproj/project.pbxproj','CURRENT_PROJECT_VERSION = 1;','CURRENT_PROJECT_VERSION = 309;',2)
 change('Feather.xcodeproj/project.pbxproj','ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;','ASSETCATALOG_COMPILER_APPICON_NAME = AppleStoreIcon;',2)
 
 # Restrict these settings to the app Release target, leaving signing dependencies alone.
