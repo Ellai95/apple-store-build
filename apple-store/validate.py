@@ -41,8 +41,8 @@ assert 'PRODUCT_NAME = "$(TARGET_NAME)";' not in project
 assert 'path = "Apple Store.app";' in project
 scheme = (root/'Feather.xcodeproj/xcshareddata/xcschemes/Feather.xcscheme').read_text()
 assert scheme.count('BuildableName = "Apple Store.app"') == 3
-assert project.count('CURRENT_PROJECT_VERSION = 307;')==2
-assert 'FEATHER_PROJECT_VERSION=3.7' in (root/'Feather.xcconfig').read_text()
+assert project.count('CURRENT_PROJECT_VERSION = 308;')==2
+assert 'FEATHER_PROJECT_VERSION=3.8' in (root/'Feather.xcconfig').read_text()
 assert 'FEATHER_PRODUCT_BUNDLE_IDENTIFIER=ru.ipa95.applestore' in (root/'Feather.xcconfig').read_text()
 plist=plistlib.loads((resources/'Info.plist').read_bytes())
 assert plist['CFBundleURLTypes'][0]['CFBundleURLSchemes']==['appleipa']
@@ -87,7 +87,7 @@ print('PASS: install migration hook, server errors, launch wiring, channel and s
 assert 'StoreSettingsVisibility.advancedOptions' in settings and 'static let advancedOptions = false' in settings
 assert 'static let sourceLink = false' in settings
 assert '@AppStorage("AppleStore.autoCleanup") private var autoCleanup = true' in settings
-assert 'struct StoreChangelogView: View' in settings and 'Версия 3.7' in settings
+assert 'struct StoreChangelogView: View' in settings and 'Версия 3.8' in settings
 assert 'StoreInstallAppSnapshot(app)' in pipeline
 assert 'storeTransfers.closeAfterCompleteTransfer()' in pipeline
 assert 'StorePayloadTransfers.bytes' in server
@@ -109,3 +109,14 @@ for path in (root/'Feather/AppleStore').glob('*.swift'):
 size_source=(root/'Feather/AppleStore/StoreFileSizes.swift').read_text()
 assert 'url.host == StoreVault.url("catalog").host' in size_source
 print('PASS: no literal protected addresses in own Swift sources; size probe retains host restriction.')
+
+assert 'func start(_ app: StoreApp) { startCatalog(app, bundleID: nil) }' in pipeline
+assert 'OptionsManager.shared.options =' not in pipeline
+assert 'options.appIdentifier = customBundleID' in pipeline
+assert 'signed.identifier != customBundleID' in pipeline
+assert 'signLocal(source, bundleID: customBundleID)' in pipeline
+assert 'startCatalog(app, bundleID: customBundleID)' in pipeline
+library=(root/'Feather/AppleStore/StoreLibraryView.swift').read_text()
+assert 'Изменить Bundle ID' in library and 'onDismiss: installBundleRequest' in library
+assert 'startWithBundleID' not in catalog_view
+print('PASS: Library-only Bundle ID flow, unchanged catalog entry, isolated options and retry identity.')

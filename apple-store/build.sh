@@ -20,7 +20,7 @@ text = subprocess.check_output(['xcodebuild', '-version'], text=True)
 assert tuple(map(int, re.search(r'Xcode (\d+)\.(\d+)', text).groups())) >= (26, 3), 'Xcode 26.3+ required'
 PY
 
-# Prepare Apple Store 3.7
+# Prepare Apple Store 3.8
 set -euo pipefail
 if [ ! -f customization/apple-store/prepare.py ]; then
   echo 'Upload apple-store folder at repository ROOT, alongside README.md.' | tee source/build-report/prepare.log
@@ -64,6 +64,10 @@ source/build-report/defaults-smoke | tee source/build-report/defaults-smoke.log
 xcrun swiftc -swift-version 5 -parse-as-library source/Feather/AppleStore/StoreVault.swift source/Feather/AppleStore/StoreCatalogData.swift source/Feather/AppleStore/StoreFileSizes.swift customization/apple-store/tests/FileSizeSmoke.swift -o source/build-report/file-size-smoke
 source/build-report/file-size-smoke | tee source/build-report/file-size-smoke.log
 
+# Check isolated Bundle ID validation before signing/building.
+xcrun swiftc -swift-version 5 -parse-as-library source/Feather/AppleStore/StoreBundleID.swift customization/apple-store/tests/BundleIDSmoke.swift -o source/build-report/bundle-id-smoke
+source/build-report/bundle-id-smoke | tee source/build-report/bundle-id-smoke.log
+
 # Check automatic cleanup safety
 set -euo pipefail
 xcrun swiftc -swift-version 5 -parse-as-library source/Feather/AppleStore/StoreCleanup.swift customization/apple-store/tests/CleanupSmoke.swift -o source/build-report/cleanup-smoke
@@ -89,13 +93,13 @@ from pathlib import Path
 import zipfile
 root=Path('source')
 excluded={'.git','_build','packages','deps','build-report'}
-with zipfile.ZipFile('Apple-Store-3.7-Source.zip','w',zipfile.ZIP_DEFLATED) as z:
+with zipfile.ZipFile('Apple-Store-3.8-Source.zip','w',zipfile.ZIP_DEFLATED) as z:
     for p in root.rglob('*'):
         rel=p.relative_to(root)
         if p.is_file() and not any(part in excluded for part in rel.parts) and rel.name != 'cert.json':
-            z.write(p,Path('Apple-Store-3.7-Source')/rel)
+            z.write(p,Path('Apple-Store-3.8-Source')/rel)
     for p in Path('customization/apple-store').rglob('*'):
         if p.is_file(): z.write(p,Path('BuildCustomization')/p.relative_to('customization/apple-store'))
 PY
 
-python3 customization/apple-store/package-licenses.py source Apple-Store-3.7-Licenses.zip
+python3 customization/apple-store/package-licenses.py source Apple-Store-3.8-Licenses.zip

@@ -11,7 +11,7 @@ audit = importlib.util.module_from_spec(spec); spec.loader.exec_module(audit)
 with tempfile.TemporaryDirectory() as tmp:
     root = Path(tmp)
     base = {
-        'Payload/AppleStore.app/Info.plist': plistlib.dumps({'CFBundleExecutable':'AppleStore','CFBundleShortVersionString':'3.7'}),
+        'Payload/AppleStore.app/Info.plist': plistlib.dumps({'CFBundleExecutable':'AppleStore','CFBundleShortVersionString':'3.8'}),
         'Payload/AppleStore.app/AppleStore': b'fixture executable',
         'Payload/AppleStore.app/StoreData.bin': b'\x91'*1200,
         'Payload/AppleStore.app/server.pem': b'expected local installation transport fixture'
