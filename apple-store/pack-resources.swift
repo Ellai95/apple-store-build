@@ -12,12 +12,14 @@ let report = root.appendingPathComponent("build-report")
 let catalogURL = resources.appendingPathComponent("AppleStoreCatalog.json")
 let catalogData = try Data(contentsOf: catalogURL)
 let catalog = try JSONSerialization.jsonObject(with: catalogData)
+let configurationURL = resources.appendingPathComponent("AppleStoreConfiguration.json")
+let configuration = try JSONSerialization.jsonObject(with: Data(contentsOf: configurationURL))
 let links = try JSONSerialization.jsonObject(with: Data(contentsOf: customization.appendingPathComponent("resource-links.json")))
 var texts: [String: String] = [:]
 for name in ["AppleStoreLicense", "AppleStoreNotices"] {
     texts[name] = try String(contentsOf: resources.appendingPathComponent(name + ".txt"), encoding: .utf8)
 }
-let plain = try JSONSerialization.data(withJSONObject: ["catalog": catalog, "links": links, "texts": texts], options: [.sortedKeys])
+let plain = try JSONSerialization.data(withJSONObject: ["catalog": catalog, "configuration": configuration, "links": links, "texts": texts], options: [.sortedKeys])
 let key = SymmetricKey(size: .bits256)
 let keyBytes = key.withUnsafeBytes { Array($0) }
 let mask = SymmetricKey(size: .bits256).withUnsafeBytes { Array($0) }
@@ -38,5 +40,6 @@ try swift.write(to: swiftFile, atomically: true, encoding: .utf8)
 try plain.write(to: root.appendingPathComponent("SOURCE_RESOURCES.json"), options: .atomic)
 try catalogData.write(to: report.appendingPathComponent("plain-catalog.json"), options: .atomic)
 try FileManager.default.removeItem(at: catalogURL)
+try FileManager.default.removeItem(at: configurationURL)
 for name in texts.keys { try FileManager.default.removeItem(at: resources.appendingPathComponent(name + ".txt")) }
 print("PASS: encrypted bundled catalog, links and notices; source originals retained outside app target.")

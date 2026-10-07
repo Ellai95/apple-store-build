@@ -9,7 +9,7 @@ import sys
 import zipfile
 
 def check(ipa, report):
-    forbidden_names = {'AppleStoreCatalog.json', 'AppleStoreLicense.txt', 'AppleStoreNotices.txt',
+    forbidden_names = {'AppleStoreConfiguration.json', 'AppleStoreCatalog.json', 'AppleStoreLicense.txt', 'AppleStoreNotices.txt',
                        'SOURCE_RESOURCES.json', 'resource-links.json', 'cert.json', '.env'}
     secret_patterns = [rb'\b[0-9]{8,12}:[A-Za-z0-9_-]{35}\b',
                        rb'\bghp_[A-Za-z0-9]{36}\b', rb'\bgithub_pat_[A-Za-z0-9_]{70,}\b',

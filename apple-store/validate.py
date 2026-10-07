@@ -41,8 +41,8 @@ assert 'PRODUCT_NAME = "$(TARGET_NAME)";' not in project
 assert 'path = "Apple Store.app";' in project
 scheme = (root/'Feather.xcodeproj/xcshareddata/xcschemes/Feather.xcscheme').read_text()
 assert scheme.count('BuildableName = "Apple Store.app"') == 3
-assert project.count('CURRENT_PROJECT_VERSION = 311;')==2
-assert 'FEATHER_PROJECT_VERSION=3.8' in (root/'Feather.xcconfig').read_text()
+assert project.count('CURRENT_PROJECT_VERSION = 400;')==2
+assert 'FEATHER_PROJECT_VERSION=4.0' in (root/'Feather.xcconfig').read_text()
 assert 'FEATHER_PRODUCT_BUNDLE_IDENTIFIER=ru.ipa95.applestore' in (root/'Feather.xcconfig').read_text()
 plist=plistlib.loads((resources/'Info.plist').read_bytes())
 assert plist['CFBundleURLTypes'][0]['CFBundleURLSchemes']==['appleipa']
@@ -72,7 +72,7 @@ assert project.count('INFOPLIST_KEY_UILaunchStoryboardName = AppleStoreLaunch34;
 assert plist['UILaunchStoryboardName'] == 'AppleStoreLaunch34'
 assert (resources/'AppleStoreLaunch34.storyboard').is_file()
 settings=(root/'Feather/AppleStore/StoreSettingsView.swift').read_text()
-licenses=settings.split('struct StoreLicensesView: View {',1)[1]
+licenses=settings.split('struct StoreLicensesView: View {',1)[1].split('#endif',1)[0]
 assert licenses.count('NavigationLink(')==2
 assert 'Apple Store распространяется' not in licenses and 'Link("Feather' not in licenses
 assert 'Наш канал в Телеграм' in settings and 'https://t.me/appipastore' not in settings
@@ -87,7 +87,7 @@ print('PASS: install migration hook, server errors, launch wiring, channel and s
 assert 'StoreSettingsVisibility.advancedOptions' in settings and 'static let advancedOptions = false' in settings
 assert 'static let sourceLink = false' in settings
 assert '@AppStorage("AppleStore.autoCleanup") private var autoCleanup = true' in settings
-assert 'struct StoreChangelogView: View' in settings and 'Версия 3.8' in settings
+assert 'struct StoreChangelogView: View' in settings and 'remote.document.changelog' in settings
 assert 'StoreInstallAppSnapshot(app)' in pipeline
 assert 'storeTransfers.closeAfterCompleteTransfer()' in pipeline
 assert 'StorePayloadTransfers.bytes' in server
@@ -131,3 +131,13 @@ assert 'ownsSource: request.ownsSource' in library
 assert 'StoreDownloader' not in bundle_view and 'StoreBundlePreparation' not in bundle_view
 assert 'bundleProfile' not in pipeline and 'StoreBundleID.permits' not in pipeline
 print('PASS: immediate editor, catalog metadata/local identity, download only on install, no profile-ID preflight gate.')
+
+configuration=json.loads((resources/'AppleStoreConfiguration.json').read_text())
+assert configuration['schemaVersion']==1
+assert [p['price'] for p in configuration['purchase']['tariffs']]==[1000,1700,2000,2500,5000]
+assert 'StoreUpdateVerifier.archive' in pipeline and pipeline.count('StoreUpdateVerifier.identity') == 2
+assert 'selfUpdate != nil || idevice' in pipeline
+assert 'selfUpdate == nil ? OptionsManager.shared.options : Options.defaultOptions' in pipeline
+assert 'remote.document.layout.settings' in settings
+assert (root/'Feather/AppleStore/StoreRemoteData.swift').is_file()
+print('PASS: remote configuration, certificate tariffs and isolated verified self-update wiring.')

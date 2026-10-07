@@ -20,7 +20,7 @@ text = subprocess.check_output(['xcodebuild', '-version'], text=True)
 assert tuple(map(int, re.search(r'Xcode (\d+)\.(\d+)', text).groups())) >= (26, 3), 'Xcode 26.3+ required'
 PY
 
-# Prepare Apple Store 3.8
+# Prepare Apple Store 4.0
 set -euo pipefail
 if [ ! -f customization/apple-store/prepare.py ]; then
   echo 'Upload apple-store folder at repository ROOT, alongside README.md.' | tee source/build-report/prepare.log
@@ -37,6 +37,10 @@ git -C source diff > source/build-report/source-changes.patch
 xcrun swiftc -frontend -parse source/Feather/AppleStore/*.swift
 xcrun swiftc -swift-version 5 -D STORE_VAULT_TESTS source/Feather/AppleStore/StoreVault.swift source/Feather/AppleStore/StoreCatalogData.swift customization/apple-store/tests/main.swift -o source/build-report/catalog-tests
 source/build-report/catalog-tests source/build-report/plain-catalog.json source/Feather/Resources/StoreData.bin | tee source/build-report/catalog-tests.log
+
+# Validate remote documents, deep links, release identity and archive integrity.
+xcrun swiftc -swift-version 5 -parse-as-library source/Feather/AppleStore/StoreCatalogData.swift source/Feather/AppleStore/StoreRemoteData.swift source/Feather/AppleStore/StoreUpdateVerifier.swift customization/apple-store/tests/RemoteSmoke.swift -o source/build-report/remote-smoke
+source/build-report/remote-smoke customization/Online/configuration.json | tee source/build-report/remote-smoke.log
 
 # Check install progress UI without environment injection
 set -euo pipefail
@@ -84,6 +88,7 @@ python3 ../customization/apple-store/validate-ipa.py packages/Feather.ipa . buil
 python3 ../customization/apple-store/audit-ipa.py packages/Feather.ipa build-report
 mv packages/Feather.ipa "packages/Apple Store.ipa"
 shasum -a 256 "packages/Apple Store.ipa" > build-report/SHA256.txt
+python3 ../customization/apple-store/release-info.py "packages/Apple Store.ipa" packages/release.json
 )
 
 # Prepare corresponding source (GPL)
@@ -93,13 +98,17 @@ from pathlib import Path
 import zipfile
 root=Path('source')
 excluded={'.git','_build','packages','deps','build-report'}
-with zipfile.ZipFile('Apple-Store-3.8-Source.zip','w',zipfile.ZIP_DEFLATED) as z:
+with zipfile.ZipFile('Apple-Store-4.0-Source.zip','w',zipfile.ZIP_DEFLATED) as z:
     for p in root.rglob('*'):
         rel=p.relative_to(root)
         if p.is_file() and not any(part in excluded for part in rel.parts) and rel.name != 'cert.json':
-            z.write(p,Path('Apple-Store-3.8-Source')/rel)
+            z.write(p,Path('Apple-Store-4.0-Source')/rel)
     for p in Path('customization/apple-store').rglob('*'):
-        if p.is_file(): z.write(p,Path('BuildCustomization')/p.relative_to('customization/apple-store'))
+        if p.is_file(): z.write(p,Path('BuildCustomization/apple-store')/p.relative_to('customization/apple-store'))
+    for p in Path('customization/Online').rglob('*'):
+        if p.is_file(): z.write(p,Path('BuildCustomization/Online')/p.relative_to('customization/Online'))
+    workflow=Path('customization/apple-store-4.0.yml')
+    if workflow.exists(): z.write(workflow,Path('BuildCustomization/apple-store-4.0.yml'))
 PY
 
-python3 customization/apple-store/package-licenses.py source Apple-Store-3.8-Licenses.zip
+python3 customization/apple-store/package-licenses.py source Apple-Store-4.0-Licenses.zip

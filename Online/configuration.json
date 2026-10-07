@@ -1,0 +1,202 @@
+{
+  "schemaVersion": 1,
+  "revision": 1,
+  "purchase": {
+    "enabled": true,
+    "recipient": "https://t.me/ellai95",
+    "message": "Здравствуйте! Хочу приобрести сертификат «{title}» за {price} ₽. Гарантия: {guarantee}. Срок действия: {validity}.",
+    "tariffs": [
+      {
+        "id": "30",
+        "title": "30 дней",
+        "price": 1000,
+        "guarantee": "30 дней",
+        "validity": "12 месяцев",
+        "description": "Для знакомства",
+        "recommended": false,
+        "enabled": true
+      },
+      {
+        "id": "60",
+        "title": "60 дней",
+        "price": 1700,
+        "guarantee": "60 дней",
+        "validity": "12 месяцев",
+        "description": "Больше уверенности",
+        "recommended": false,
+        "enabled": true
+      },
+      {
+        "id": "90",
+        "title": "90 дней",
+        "price": 2000,
+        "guarantee": "90 дней",
+        "validity": "12 месяцев",
+        "description": "Золотая середина",
+        "recommended": true,
+        "enabled": true
+      },
+      {
+        "id": "180",
+        "title": "180 дней",
+        "price": 2500,
+        "guarantee": "180 дней",
+        "validity": "12 месяцев",
+        "description": "Полгода гарантии",
+        "recommended": false,
+        "enabled": true
+      },
+      {
+        "id": "forever",
+        "title": "Навсегда",
+        "price": 5000,
+        "guarantee": "Бессрочно",
+        "validity": "Бессрочно",
+        "description": "Максимум свободы",
+        "recommended": false,
+        "enabled": true
+      }
+    ]
+  },
+  "links": {
+    "support": "https://t.me/ellai95",
+    "channel": "https://t.me/appleipa095",
+    "certificates": "https://t.me/appleipa095/986"
+  },
+  "labels": {
+    "catalog": "Каталог",
+    "library": "Библиотека",
+    "settings": "Настройки",
+    "purchase": "Купить сертификат",
+    "support": "Поддержка",
+    "channel": "Наш канал в Телеграм",
+    "channelSubtitle": "@appleipa095",
+    "request": "Запросить приложение",
+    "help": "Помощь",
+    "about": "О приложении",
+    "update": "Обновление",
+    "updateInstall": "Обновить",
+    "buy": "Купить сертификат",
+    "search": "Найти приложение",
+    "featured": "Выбор Apple IPA",
+    "footer": "APPLE IPA · ПРИЛОЖЕНИЯ ДЛЯ ТЕБЯ",
+    "install": "Установить"
+  },
+  "news": [],
+  "changelog": [
+    {
+      "id": "4.0",
+      "title": "Версия 4.0",
+      "text": "Обновление Apple Store из настроек.\nВыбор сертификата и оформление заказа.\nНовости и полезные инструкции."
+    },
+    {
+      "id": "3.8",
+      "title": "Версия 3.8",
+      "text": "Смена Bundle ID и установка копий.\nПанель установки скрывается автоматически."
+    },
+    {
+      "id": "3.6",
+      "title": "Версия 3.6",
+      "text": "Автоочистка IPA после передачи в iOS."
+    }
+  ],
+  "help": [
+    {
+      "id": "first",
+      "title": "Первый раз устанавливаю",
+      "text": "Добавьте свой сертификат в Настройки → Мой сертификат: файл .p12, пароль и .mobileprovision. Затем выберите приложение в каталоге и нажмите установить. Подтвердите установку в окне iOS."
+    },
+    {
+      "id": "cert",
+      "title": "У меня уже есть сертификат",
+      "text": "Импортируйте оба файла в Настройки → Мой сертификат. Если сертификатов несколько, выберите основной. Он используется для подписи приложений."
+    },
+    {
+      "id": "error",
+      "title": "Приложение не открывается",
+      "text": "Проверьте срок действия сертификата и подключение к интернету. Если проблема остаётся, напишите в поддержку и приложите снимок ошибки."
+    },
+    {
+      "id": "update",
+      "title": "Как обновить Apple Store",
+      "text": "Откройте Настройки → Обновление. Если доступна новая версия, нажмите Обновить и дождитесь системного окна установки. Для обновления поверх используйте тот же сертификат, которым установлен Apple Store."
+    }
+  ],
+  "about": [
+    {
+      "id": "purpose",
+      "title": "Apple Store",
+      "text": "Приложение для установки и подписи IPA-файлов."
+    },
+    {
+      "id": "author",
+      "title": "Основатель",
+      "text": "Maga Magomadov"
+    }
+  ],
+  "appearance": {
+    "accent": "#1964F5",
+    "secondary": "#ED2E4F",
+    "lightBackground": "#F6F8FC",
+    "darkBackground": "#000000",
+    "lightSurface": "#FFFFFF",
+    "darkSurface": "#131313",
+    "logoURL": null,
+    "backgroundURL": null,
+    "bannerURL": null
+  },
+  "features": {
+    "bundleID": true,
+    "appRequests": true,
+    "selfUpdate": true,
+    "themeSwitch": true,
+    "cleanupControl": true
+  },
+  "defaults": {
+    "darkTheme": false,
+    "autoCleanup": true,
+    "availableOnly": false
+  },
+  "layout": {
+    "settings": [
+      "certificate",
+      "theme",
+      "cleanup",
+      "update",
+      "support",
+      "channel",
+      "purchase",
+      "catalog",
+      "request",
+      "help",
+      "about"
+    ],
+    "home": [
+      "heading",
+      "search",
+      "news",
+      "featured",
+      "categories"
+    ],
+    "tabs": [
+      "catalog",
+      "library",
+      "settings"
+    ]
+  },
+  "update": {
+    "enabled": false,
+    "version": "4.0",
+    "build": 400,
+    "ipaURL": "https://pub-d11175355ab34b9299fb0a916702bce7.r2.dev/Apple%20Store.ipa",
+    "sha256": "",
+    "bundleID": "ru.ipa95.applestore",
+    "sizeBytes": 0,
+    "minimumIOS": "15.0",
+    "notes": [
+      "Обновление Apple Store из настроек",
+      "Выбор сертификата и оформление заказа",
+      "Новости и полезные инструкции"
+    ]
+  }
+}
