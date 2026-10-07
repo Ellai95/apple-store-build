@@ -29,7 +29,7 @@ def check(ipa, source, report):
             'CFBundleName': 'Apple Store',
             'CFBundleIdentifier': 'ru.ipa95.applestore',
             'CFBundleShortVersionString': '3.8',
-            'CFBundleVersion': '310',
+            'CFBundleVersion': '311',
             'CFBundleExecutable': 'AppleStore',
             'UILaunchStoryboardName': 'AppleStoreLaunch34',
         }

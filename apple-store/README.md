@@ -1,4 +1,4 @@
-# Apple Store 3.8 — Fix 19
+# Apple Store 3.8 — Fix 20
 
 Build customization for the pinned Feather revision. See `../START_HERE.txt`.
 Run in the GitHub Actions macOS workspace:
@@ -20,3 +20,7 @@ CI checks catalog backward compatibility, metadata persistence, ID syntax, downl
 installation defaults and cleanup, then builds and audits the IPA. Local static
 checks do not replace Xcode compilation or iPhone tests.
 Source and notices remain in the existing separate publication artifacts.
+
+Progress presentation is hidden on handedOff/completed; manual dismissal only changes
+UI state. Server lifetime and cleanup grace are preserved. New operations/retries
+restore presentation, and errors reveal the banner. Applies to both catalog and library.

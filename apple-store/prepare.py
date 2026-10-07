@@ -42,7 +42,7 @@ change('Feather.xcodeproj/project.pbxproj','PRODUCT_NAME = "$(TARGET_NAME)";',
 change('Feather.xcodeproj/project.pbxproj','path = Feather.app;','path = "Apple Store.app";')
 change('Feather.xcodeproj/xcshareddata/xcschemes/Feather.xcscheme',
        'BuildableName = "Feather.app"','BuildableName = "Apple Store.app"',3)
-change('Feather.xcodeproj/project.pbxproj','CURRENT_PROJECT_VERSION = 1;','CURRENT_PROJECT_VERSION = 310;',2)
+change('Feather.xcodeproj/project.pbxproj','CURRENT_PROJECT_VERSION = 1;','CURRENT_PROJECT_VERSION = 311;',2)
 change('Feather.xcodeproj/project.pbxproj','ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;','ASSETCATALOG_COMPILER_APPICON_NAME = AppleStoreIcon;',2)
 
 # Restrict these settings to the app Release target, leaving signing dependencies alone.
@@ -191,5 +191,5 @@ info.write_bytes(plistlib.dumps(data,sort_keys=False))
 # Standalone provenance and complete GPL license travel with the app/source artifact.
 (source/'APPLE_STORE_CHANGES.md').write_text((base/'CHANGES.md').read_text())
 (report/'source-commit.txt').write_text(actual+'\n'+subprocess.check_output(['git','-C',str(source),'submodule','status','--recursive'],text=True))
-(report/'customization.txt').write_text('Apple Store 3.8, build 310\n'+(base/'CHANGES.md').read_text())
+(report/'customization.txt').write_text('Apple Store 3.8, build 311\n'+(base/'CHANGES.md').read_text())
 print('Apple Store 3.8 applied. New AppleStoreIcon; display name Apple Store. Ready for Xcode build.')
