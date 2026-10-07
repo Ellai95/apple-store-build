@@ -38,3 +38,16 @@ let encoded = try JSONEncoder().encode(doc)
 let decoded = try StoreCatalogDocument.decode(encoded)
 expect(decoded.apps.count == doc.apps.count && decoded.revision == doc.revision, "Cache serialization failed")
 print("PASS catalog decoding, rejection cases, search, preservation, contacts and cache round-trip")
+
+let rawApps = original["apps"] as! [[String: Any]]
+for (app, raw) in zip(doc.apps, rawApps) {
+    expect(app.bundleIdentifier == raw["bundleIdentifier"] as? String, "Catalog Bundle ID lost")
+}
+var legacy = original
+legacy["apps"] = rawApps.map { raw -> [String: Any] in
+    var copy = raw; copy.removeValue(forKey: "bundleIdentifier"); return copy
+}
+let legacyDoc = try StoreCatalogDocument.decode(JSONSerialization.data(withJSONObject: legacy))
+expect(legacyDoc.apps.allSatisfy { $0.bundleIdentifier == nil }, "Old catalog compatibility failed")
+expect(decoded.apps.map(\.bundleIdentifier) == doc.apps.map(\.bundleIdentifier), "Bundle ID cache round-trip failed")
+print("PASS catalog Bundle ID metadata, legacy missing metadata, and cache preservation")

@@ -9,16 +9,9 @@ import Foundation
             precondition(StoreBundleID.error(id) != nil, id)
         }
         precondition(StoreBundleID.cleaned(" com.example.app \n") == "com.example.app")
-        precondition(StoreBundleID.error("com.example.app", original: "com.example.app") != nil)
-        precondition(StoreBundleID.error("COM.example.app", original: "com.example.app") != nil)
         precondition(StoreBundleID.error("ru.ipa95.applestore", own: "ru.ipa95.applestore") != nil)
-        precondition(StoreBundleID.permits("com.example.app", applicationIdentifier: "TEAM123456.*"))
-        precondition(StoreBundleID.permits("com.example.app", applicationIdentifier: "TEAM123456.com.example.*"))
-        precondition(!StoreBundleID.permits("com.examplex.app", applicationIdentifier: "TEAM123456.com.example.*"))
-        precondition(!StoreBundleID.permits("com.example.app.copy", applicationIdentifier: "TEAM123456.com.example.app"))
-        precondition(StoreBundleID.permits("com.example.app", applicationIdentifier: "TEAM123456.com.example.app"))
-        precondition(!StoreBundleID.permits("com.example.app", applicationIdentifier: "invalid"))
-        precondition(!StoreBundleID.permits("com.example.app", applicationIdentifier: "TEAM123456.com.*.app"))
+        precondition(StoreBundleID.error("net.whatsapp.WhatsApp1") == nil)
+        precondition(StoreBundleID.error("net.whatsapp.WhatsApp2") == nil)
         let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: dir) }
@@ -33,9 +26,6 @@ import Foundation
         var rejected = false
         do { _ = try StoreBundleID.original(in: dir) } catch { rejected = true }
         precondition(rejected)
-        precondition(StoreBundleID.permittedPattern(" TEAM123456.com.example.* \n") == "com.example.*")
-        precondition(StoreBundleID.permits("com.example.app.copy", applicationIdentifier: "TEAM123456.com.example.*"))
-        precondition(!StoreBundleID.permits("ru.ipa95.copy.catalog-whatsapp", applicationIdentifier: "TEAM123456.com.example.*"))
-        print("PASS: Bundle ID syntax, same-ID guard, original IPA XML/binary extraction, explicit/wildcard profile matching")
+        print("PASS: Bundle ID syntax, original IPA XML/binary extraction; existing ID accepted for updates")
     }
 }

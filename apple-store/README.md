@@ -1,19 +1,22 @@
-# Apple Store 3.8
+# Apple Store 3.8 — Fix 19
 
 Build customization for the pinned Feather revision. See `../START_HERE.txt`.
-Run from a GitHub Actions macOS workspace containing `source` and `customization`:
+Run in the GitHub Actions macOS workspace:
 
 ```sh
 bash customization/apple-store/build.sh
 ```
 
-The new Library action supplies a per-operation Bundle ID to the existing signer.
-The catalog install entry passes nil and retains its existing behavior. No global
-signing preferences are saved by this action. Imported local originals are retained.
-Catalog sources are downloaded only when selected through the new flow.
+The Library editor passes a per-operation ID to the existing signer. It reads
+local Info.plist or optional catalog bundleIdentifier without downloading IPA.
+Missing metadata allows manual input. Catalog metadata is not authenticated IPA
+identity. Download/import happens only after Install through the existing pipeline.
+No application-identifier profile allowlist is applied by this custom flow; actual
+signing and iOS validation remain unchanged. Syntax and self-replacement checks remain.
+Unchanged input is accepted for updates. Original local items and global preferences
+are preserved. Ordinary catalog installs continue to pass a nil override.
 
-CI checks ID validation/profile matching, existing download, progress, installation
-and cleanup behavior, compiles the app, and audits the produced IPA. Local static
-validation is not a substitute for Xcode compilation and device testing.
-
-Source and third-party notices are emitted by the existing source/license packaging steps.
+CI checks catalog backward compatibility, metadata persistence, ID syntax, downloader,
+installation defaults and cleanup, then builds and audits the IPA. Local static
+checks do not replace Xcode compilation or iPhone tests.
+Source and notices remain in the existing separate publication artifacts.
