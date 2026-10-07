@@ -1,16 +1,20 @@
-# Apple Store 4.0 — build 400
+# Apple Store 4.1 — package 22
 
-Overlay for pinned Feather revision 7078b053c0af262809a48e4d3898d42b0d35fedf.
-Run prepare.py only on a clean checkout, then build.sh via the supplied macOS workflow.
-Display name remains Apple Store, bundle ID ru.ipa95.applestore.
+Test release, build 410. The installation, certificate, downloader and Bundle ID
+implementation is unchanged from the user-tested 4.0 package. Only version
+metadata, bundled release notes and the offline publication tools changed.
 
-New remote configuration is shipped in the protected resources, cached after validation,
-and refreshed from R2. See ../Online/README.md for editable fields and publication tools.
-The self-update path is isolated from catalog and Library custom Bundle ID operations.
-It verifies archive size, SHA-256, actual main-app ID/version/build/name before signing
-and identity again after signing. Default clean signing options preserve update identity.
-The existing installer transport handles system confirmation and payload delivery.
+Upload apple-store and Online at the root of apple-store-build. Replace the
+existing workflow contents with apple-store-4.1.yml. Run Actions on main.
+On Windows, run Online/Publish-Test-Update.cmd with the original IPA produced
+by that build and its adjacent release.json. See START_HERE.txt for full steps.
 
-Linux-side integration and syntax checks do not replace Xcode compilation or iPhone testing.
-GitHub CI validates remote documents and release integrity before compiling the app.
-Publish matching source and license artifacts alongside each distributed IPA.
+Publication preserves the current R2 configuration, adds the 4.1 announcement
+for builds 400–409, uploads the immutable versioned IPA first, then publishes
+configuration.json. No publication was performed from this workspace.
+
+Xcode and device verification remain necessary. Keep the installed 4.0 on the
+test device; the purpose of 4.1 is to exercise that existing update flow.
+
+The pinned base and dependency notices are preserved. The workflow emits the
+corresponding source and licenses in a separate artifact alongside the IPA.

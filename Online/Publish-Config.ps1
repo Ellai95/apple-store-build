@@ -5,10 +5,14 @@ try {
     if ($config.schemaVersion -ne 1 -or $config.revision -lt 1) { throw 'Invalid schemaVersion/revision.' }
     $rclone = 'C:\rclone\rclone.exe'
     if (!(Test-Path -LiteralPath $rclone)) { $rclone = (Get-Command rclone -ErrorAction Stop).Source }
-    $ErrorActionPreference = 'Continue'
-    $remoteText = & $rclone cat 'r2:appleipa-files/apple-store/configuration.json' 2>$null
-    $readCode = $LASTEXITCODE
-    $ErrorActionPreference = 'Stop'
+    $remotePath = Join-Path ([IO.Path]::GetTempPath()) ('apple-store-config-' + [guid]::NewGuid().ToString() + '.json')
+    try {
+        $ErrorActionPreference = 'Continue'
+        & $rclone copyto 'r2:appleipa-files/apple-store/configuration.json' $remotePath --ignore-times 2>&1 | Out-Null
+        $readCode = $LASTEXITCODE
+        $ErrorActionPreference = 'Stop'
+        $remoteText = if ($readCode -eq 0) { Get-Content -LiteralPath $remotePath -Raw -Encoding UTF8 } else { '' }
+    } finally { Remove-Item -LiteralPath $remotePath -Force -ErrorAction SilentlyContinue }
     if ($readCode -eq 0) {
         $current = ($remoteText -join "`n") | ConvertFrom-Json
         if ([int]$config.revision -lt [int]$current.revision) { throw 'Remote configuration is newer. Run Get-Config.cmd first.' }

@@ -29,6 +29,15 @@ enum StoreVault {
         try reject { var p = $0["update"] as! [String: Any]; p["enabled"] = true; $0["update"] = p }
         let news = StoreRemoteDocument.News(id: "test", enabled: true, title: "Test", text: "", button: "", action: "none", url: nil, modal: true, minBuild: 400, maxBuild: 410, startsAt: nil, endsAt: nil)
         precondition(!news.active(build: 399) && news.active(build: 400) && !news.active(build: 411))
+        let profileData = try Data(contentsOf: URL(fileURLWithPath: CommandLine.arguments[2]))
+        let profile = try JSONSerialization.jsonObject(with: profileData) as! [String: Any]
+        var announcementFixture = initial
+        announcementFixture["news"] = [profile["announcement"]!]
+        let targeted = try StoreRemoteDocument.decode(JSONSerialization.data(withJSONObject: announcementFixture))
+        precondition(targeted.news.count == 1)
+        precondition(targeted.news[0].active(build: 400))
+        precondition(!targeted.news[0].active(build: 410))
+        precondition(targeted.news[0].modal && targeted.news[0].action == "update")
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: directory) }
@@ -36,10 +45,10 @@ enum StoreVault {
         let file = directory.appendingPathComponent("Application.ipa")
         try bytes.write(to: file)
         let digest = SHA256.hash(data: bytes).map { String(format: "%02x", $0) }.joined()
-        let release = StoreRemoteDocument.Update(enabled: true, version: "4.1", build: 401, ipaURL: "https://example.com/app.ipa", sha256: digest, bundleID: "ru.ipa95.applestore", sizeBytes: Int64(bytes.count), minimumIOS: "15.0", notes: [])
-        precondition(release.newer(than: 400) && !release.newer(than: 401))
+        let release = StoreRemoteDocument.Update(enabled: true, version: "4.1", build: 410, ipaURL: "https://example.com/app.ipa", sha256: digest, bundleID: "ru.ipa95.applestore", sizeBytes: Int64(bytes.count), minimumIOS: "15.0", notes: [])
+        precondition(release.newer(than: 400) && !release.newer(than: 410))
         try StoreUpdateVerifier.archive(file, release: release)
-        let plist: [String: Any] = ["CFBundleIdentifier": release.bundleID, "CFBundleDisplayName": "Apple Store", "CFBundleShortVersionString": "4.1", "CFBundleVersion": "401"]
+        let plist: [String: Any] = ["CFBundleIdentifier": release.bundleID, "CFBundleDisplayName": "Apple Store", "CFBundleShortVersionString": "4.1", "CFBundleVersion": "410"]
         try PropertyListSerialization.data(fromPropertyList: plist, format: .binary, options: 0).write(to: directory.appendingPathComponent("Info.plist"))
         try StoreUpdateVerifier.identity(directory, release: release, own: release.bundleID, build: 400)
         do { try StoreUpdateVerifier.identity(directory, release: release, own: "other.app", build: 400); fatalError("Wrong identity accepted") } catch StoreUpdateVerifier.Failure.identity { }

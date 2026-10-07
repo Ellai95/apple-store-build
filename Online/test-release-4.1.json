@@ -1,0 +1,26 @@
+{
+  "version": "4.1",
+  "build": 410,
+  "notes": [
+    "Тестовый выпуск для проверки обновления из приложения"
+  ],
+  "changelog": {
+    "id": "4.1",
+    "title": "Версия 4.1",
+    "text": "Тестовый выпуск для проверки обновления Apple Store из приложения."
+  },
+  "announcement": {
+    "id": "apple-store-update-4-1-410",
+    "enabled": true,
+    "title": "Доступен Apple Store 4.1",
+    "text": "Новую версию можно установить прямо здесь. Нажмите «Обновить», дождитесь загрузки и подписи, затем подтвердите установку в окне iOS.",
+    "button": "Обновить",
+    "action": "update",
+    "url": null,
+    "modal": true,
+    "minBuild": 400,
+    "maxBuild": 409,
+    "startsAt": null,
+    "endsAt": null
+  }
+}
