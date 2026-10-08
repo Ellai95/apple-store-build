@@ -41,8 +41,8 @@ assert 'PRODUCT_NAME = "$(TARGET_NAME)";' not in project
 assert 'path = "Apple Store.app";' in project
 scheme = (root/'Feather.xcodeproj/xcshareddata/xcschemes/Feather.xcscheme').read_text()
 assert scheme.count('BuildableName = "Apple Store.app"') == 3
-assert project.count('CURRENT_PROJECT_VERSION = 410;')==2
-assert 'FEATHER_PROJECT_VERSION=4.1' in (root/'Feather.xcconfig').read_text()
+assert project.count('CURRENT_PROJECT_VERSION = 420;')==2
+assert 'FEATHER_PROJECT_VERSION=4.2' in (root/'Feather.xcconfig').read_text()
 assert 'FEATHER_PRODUCT_BUNDLE_IDENTIFIER=ru.ipa95.applestore' in (root/'Feather.xcconfig').read_text()
 plist=plistlib.loads((resources/'Info.plist').read_bytes())
 assert plist['CFBundleURLTypes'][0]['CFBundleURLSchemes']==['appleipa']
@@ -135,9 +135,14 @@ print('PASS: immediate editor, catalog metadata/local identity, download only on
 configuration=json.loads((resources/'AppleStoreConfiguration.json').read_text())
 assert configuration['schemaVersion']==1
 assert [p['price'] for p in configuration['purchase']['tariffs']]==[1000,1700,2000,2500,5000]
-assert 'StoreUpdateVerifier.archive' in pipeline and pipeline.count('StoreUpdateVerifier.identity') == 2
+assert 'StoreUpdateVerifier.archive' in pipeline and 'StoreUpdateVerifier.sourceIdentity' in pipeline and 'StoreUpdateVerifier.signedIdentity' in pipeline
 assert 'selfUpdate != nil || idevice' in pipeline
 assert 'selfUpdate == nil ? OptionsManager.shared.options : Options.defaultOptions' in pipeline
 assert 'remote.document.layout.settings' in settings
 assert (root/'Feather/AppleStore/StoreRemoteData.swift').is_file()
 print('PASS: remote configuration, certificate tariffs and isolated verified self-update wiring.')
+
+assert "release.bundleID == Bundle.main.bundleIdentifier" not in pipeline
+assert "guard signed.identifier == own" in pipeline
+assert "options.appIdentifier = Bundle.main.bundleIdentifier" in pipeline
+print("PASS: verified canonical source is re-signed to the installed application ID before self-update.")

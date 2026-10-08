@@ -85,6 +85,11 @@
   "news": [],
   "changelog": [
     {
+      "id": "4.2",
+      "title": "Версия 4.2",
+      "text": "Исправлено обновление Apple Store после установки через сервисы подписи."
+    },
+    {
       "id": "4.1",
       "title": "Версия 4.1",
       "text": "Тестовый выпуск для проверки обновления Apple Store из приложения."
@@ -191,15 +196,15 @@
   },
   "update": {
     "enabled": false,
-    "version": "4.1",
-    "build": 410,
+    "version": "4.2",
+    "build": 420,
     "ipaURL": "https://pub-d11175355ab34b9299fb0a916702bce7.r2.dev/Apple%20Store.ipa",
     "sha256": "",
     "bundleID": "ru.ipa95.applestore",
     "sizeBytes": 0,
     "minimumIOS": "15.0",
     "notes": [
-      "Тестовый выпуск для проверки обновления из приложения"
+      "Исправлено обновление Apple Store после установки через сервисы подписи."
     ]
   }
 }

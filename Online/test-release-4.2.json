@@ -1,0 +1,26 @@
+{
+  "version": "4.2",
+  "build": 420,
+  "notes": [
+    "Исправлено обновление Apple Store после установки через сервисы подписи."
+  ],
+  "changelog": {
+    "id": "4.2",
+    "title": "Версия 4.2",
+    "text": "Исправлено обновление Apple Store после установки через сервисы подписи."
+  },
+  "announcement": {
+    "id": "apple-store-update-4-2-420",
+    "enabled": true,
+    "title": "Доступен Apple Store 4.2",
+    "text": "Новую версию можно установить прямо здесь. Нажмите «Обновить», дождитесь загрузки и подписи, затем подтвердите установку в окне iOS.",
+    "button": "Обновить",
+    "action": "update",
+    "url": null,
+    "modal": true,
+    "minBuild": 400,
+    "maxBuild": 419,
+    "startsAt": null,
+    "endsAt": null
+  }
+}

@@ -1,20 +1,13 @@
-# Apple Store 4.1 — package 22
+# Apple Store 4.2 — package 25
 
-Test release, build 410. The installation, certificate, downloader and Bundle ID
-implementation is unchanged from the user-tested 4.0 package. Only version
-metadata, bundled release notes and the offline publication tools changed.
+Build 420 separates the canonical downloaded release identity from the local
+installation identity. The downloaded archive must match the published hash,
+size, canonical bundle ID, name and version. The signer sets the current
+Bundle.main.bundleIdentifier; the signed plist and library record must both
+match it before iOS installation begins.
 
-Upload apple-store and Online at the root of apple-store-build. Replace the
-existing workflow contents with apple-store-4.1.yml. Run Actions on main.
-On Windows, run Online/Publish-Test-Update.cmd with the original IPA produced
-by that build and its adjacent release.json. See START_HERE.txt for full steps.
+Existing catalog/Library flows retain their behavior. Run the macOS workflow
+and RemoteSmoke tests before device testing. See START_HERE.txt for the one-time
+migration from 4.0 and the subsequent update test.
 
-Publication preserves the current R2 configuration, adds the 4.1 announcement
-for builds 400–409, uploads the immutable versioned IPA first, then publishes
-configuration.json. No publication was performed from this workspace.
-
-Xcode and device verification remain necessary. Keep the installed 4.0 on the
-test device; the purpose of 4.1 is to exercise that existing update flow.
-
-The pinned base and dependency notices are preserved. The workflow emits the
-corresponding source and licenses in a separate artifact alongside the IPA.
+The workflow emits corresponding source and component licenses separately.

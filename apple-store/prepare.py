@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Apply the Apple Store 4.1 overlay to the pinned, tested Feather revision.
+"""Apply the Apple Store 4.2 overlay to the pinned, tested Feather revision.
 No signing certificates or secrets are required. Run: python3 prepare.py SOURCE.
 """
 from pathlib import Path
@@ -32,7 +32,7 @@ change('Makefile','-project Feather.xcodeproj','-workspace Feather.xcworkspace')
 change('Makefile', '_build/Payload/Feather.app', '_build/Payload/AppleStore.app', 5)
 
 # New app identity allows baseline Feather and Apple Store to coexist.
-change('Feather.xcconfig','FEATHER_PROJECT_VERSION=2.9.0','FEATHER_PROJECT_VERSION=4.1')
+change('Feather.xcconfig','FEATHER_PROJECT_VERSION=2.9.0','FEATHER_PROJECT_VERSION=4.2')
 change('Feather.xcconfig','FEATHER_PRODUCT_BUNDLE_IDENTIFIER=thewonderofyou.Feather','FEATHER_PRODUCT_BUNDLE_IDENTIFIER=ru.ipa95.applestore')
 change('Feather.xcodeproj/project.pbxproj','INFOPLIST_KEY_CFBundleDisplayName = Feather;','INFOPLIST_KEY_CFBundleDisplayName = "Apple Store";',2)
 # Generated Info.plist gets CFBundleName from PRODUCT_NAME.
@@ -42,7 +42,7 @@ change('Feather.xcodeproj/project.pbxproj','PRODUCT_NAME = "$(TARGET_NAME)";',
 change('Feather.xcodeproj/project.pbxproj','path = Feather.app;','path = "Apple Store.app";')
 change('Feather.xcodeproj/xcshareddata/xcschemes/Feather.xcscheme',
        'BuildableName = "Feather.app"','BuildableName = "Apple Store.app"',3)
-change('Feather.xcodeproj/project.pbxproj','CURRENT_PROJECT_VERSION = 1;','CURRENT_PROJECT_VERSION = 410;',2)
+change('Feather.xcodeproj/project.pbxproj','CURRENT_PROJECT_VERSION = 1;','CURRENT_PROJECT_VERSION = 420;',2)
 change('Feather.xcodeproj/project.pbxproj','ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;','ASSETCATALOG_COMPILER_APPICON_NAME = AppleStoreIcon;',2)
 
 # Restrict these settings to the app Release target, leaving signing dependencies alone.
@@ -191,5 +191,5 @@ info.write_bytes(plistlib.dumps(data,sort_keys=False))
 # Standalone provenance and complete GPL license travel with the app/source artifact.
 (source/'APPLE_STORE_CHANGES.md').write_text((base/'CHANGES.md').read_text())
 (report/'source-commit.txt').write_text(actual+'\n'+subprocess.check_output(['git','-C',str(source),'submodule','status','--recursive'],text=True))
-(report/'customization.txt').write_text('Apple Store 4.1, build 410\n'+(base/'CHANGES.md').read_text())
-print('Apple Store 4.1 applied. New AppleStoreIcon; display name Apple Store. Ready for Xcode build.')
+(report/'customization.txt').write_text('Apple Store 4.2, build 420\n'+(base/'CHANGES.md').read_text())
+print('Apple Store 4.2 applied. New AppleStoreIcon; display name Apple Store. Ready for Xcode build.')

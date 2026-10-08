@@ -2,13 +2,11 @@ $ErrorActionPreference = 'Stop'
 try {
     $rclone = 'C:\rclone\rclone.exe'
     if (!(Test-Path -LiteralPath $rclone)) { $rclone = (Get-Command rclone -ErrorAction Stop).Source }
+    . (Join-Path $PSScriptRoot 'Read-RemoteConfig.ps1')
+    $value = Get-StoreRemoteConfiguration -Rclone $rclone
+    if ($null -eq $value) { throw 'No online configuration exists yet. Your local file was not changed.' }
     $path = Join-Path $PSScriptRoot 'configuration.json'
-    $temp = Join-Path $PSScriptRoot 'configuration.download.json'
-    & $rclone copyto 'r2:appleipa-files/apple-store/configuration.json' $temp --ignore-times --progress
-    if ($LASTEXITCODE -ne 0) { throw 'Download failed. Your local file was not changed.' }
-    $value = Get-Content -LiteralPath $temp -Raw -Encoding UTF8 | ConvertFrom-Json
-    if ($value.schemaVersion -ne 1) { throw 'Unexpected configuration format.' }
     if (Test-Path -LiteralPath $path) { Copy-Item -LiteralPath $path -Destination "$path.bak" -Force }
-    Move-Item -LiteralPath $temp -Destination $path -Force
+    [IO.File]::WriteAllText($path, ($value | ConvertTo-Json -Depth 30), (New-Object Text.UTF8Encoding($false)))
     Write-Host 'Current configuration downloaded.' -ForegroundColor Green
 } catch { Write-Host $_.Exception.Message -ForegroundColor Red; exit 1 }

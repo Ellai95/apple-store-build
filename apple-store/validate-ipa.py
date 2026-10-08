@@ -28,8 +28,8 @@ def check(ipa, source, report):
             'CFBundleDisplayName': 'Apple Store',
             'CFBundleName': 'Apple Store',
             'CFBundleIdentifier': 'ru.ipa95.applestore',
-            'CFBundleShortVersionString': '4.1',
-            'CFBundleVersion': '410',
+            'CFBundleShortVersionString': '4.2',
+            'CFBundleVersion': '420',
             'CFBundleExecutable': 'AppleStore',
             'UILaunchStoryboardName': 'AppleStoreLaunch34',
         }
@@ -80,7 +80,7 @@ def check(ipa, source, report):
                   'iconSHA256': hashlib.sha256(preview).hexdigest(),
                   'compiledIcons': sorted(compiled), 'oldIconResources': False}
         (report / 'app-identity.json').write_text(json.dumps(result, indent=2) + '\n')
-        print('PASS: Apple Store name, version 4.1, new compiled icon and installer PNG; no old icon resources.')
+        print('PASS: Apple Store name, version 4.2, new compiled icon and installer PNG; no old icon resources.')
 
 
 if __name__ == '__main__':

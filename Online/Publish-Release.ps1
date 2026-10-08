@@ -11,7 +11,7 @@ try {
     $profile = $null
     if ($ProfilePath) {
         $profile = Get-Content -LiteralPath $ProfilePath -Raw -Encoding UTF8 | ConvertFrom-Json
-        if ($profile.version -ne $release.version -or [int]$profile.build -ne [int]$release.build) { throw 'This test publisher requires version 4.1, build 410, from this package.' }
+        if ($profile.version -ne $release.version -or [int]$profile.build -ne [int]$release.build) { throw 'This test publisher requires version 4.2, build 420, from this package.' }
         if ($profile.announcement.action -ne 'update' -or !$profile.announcement.modal -or [int]$profile.announcement.maxBuild -ne ([int]$release.build - 1)) { throw 'Invalid announcement targeting.' }
     }
     $configPath = Join-Path $PSScriptRoot 'configuration.json'
@@ -19,20 +19,13 @@ try {
     if (!$profile -and $config.update.enabled -and [int]$release.build -le [int]$config.update.build) { throw 'This release or a newer one is already in configuration.json.' }
     $rclone = 'C:\rclone\rclone.exe'
     if (!(Test-Path -LiteralPath $rclone)) { $rclone = (Get-Command rclone -ErrorAction Stop).Source }
-    $remotePath = Join-Path ([IO.Path]::GetTempPath()) ('apple-store-config-' + [guid]::NewGuid().ToString() + '.json')
-    try {
-        $ErrorActionPreference = 'Continue'
-        & $rclone copyto 'r2:appleipa-files/apple-store/configuration.json' $remotePath --ignore-times 2>&1 | Out-Null
-        $readCode = $LASTEXITCODE
-        $ErrorActionPreference = 'Stop'
-        $remoteText = if ($readCode -eq 0) { Get-Content -LiteralPath $remotePath -Raw -Encoding UTF8 } else { '' }
-    } finally { Remove-Item -LiteralPath $remotePath -Force -ErrorAction SilentlyContinue }
-    if ($readCode -eq 0) {
-        $current = ($remoteText -join "`n") | ConvertFrom-Json
+    . (Join-Path $PSScriptRoot 'Read-RemoteConfig.ps1')
+    $current = Get-StoreRemoteConfiguration -Rclone $rclone
+    if ($null -ne $current) {
         if (!$profile -and [int]$current.revision -gt [int]$config.revision) { throw 'Remote configuration is newer. Run Get-Config.cmd and reapply release notes.' }
         if ($current.update.enabled -and [int]$current.update.build -ge [int]$release.build) { throw 'This release or a newer one is already published.' }
         if ($profile) { $config = $current } # Preserve the current online tariffs, texts and appearance.
-    } elseif ($readCode -ne 3 -and $readCode -ne 4) { throw 'Cannot check current R2 configuration.' }
+    }
     if ($config.schemaVersion -ne 1 -or [int]$config.revision -lt 1) { throw 'Invalid configuration.' }
     if ($profile) {
         $config.update.notes = @($profile.notes)
