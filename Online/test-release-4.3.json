@@ -1,0 +1,26 @@
+{
+  "version": "4.3",
+  "build": 430,
+  "notes": [
+    "Тестовый выпуск для проверки обновления Apple Store с сохранением установленной копии."
+  ],
+  "changelog": {
+    "id": "4.3",
+    "title": "Версия 4.3",
+    "text": "Тестовый выпуск для проверки обновления Apple Store с сохранением установленной копии."
+  },
+  "announcement": {
+    "id": "apple-store-update-4-3-430",
+    "enabled": true,
+    "title": "Доступен Apple Store 4.3",
+    "text": "Новую версию можно установить прямо здесь. Нажмите «Обновить», дождитесь загрузки и подписи, затем подтвердите установку в окне iOS.",
+    "button": "Обновить",
+    "action": "update",
+    "url": null,
+    "modal": true,
+    "minBuild": 420,
+    "maxBuild": 429,
+    "startsAt": null,
+    "endsAt": null
+  }
+}

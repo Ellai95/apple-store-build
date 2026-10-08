@@ -1,13 +1,14 @@
-# Apple Store 4.2 — package 25
+# Apple Store 4.3 — package 26
 
-Build 420 separates the canonical downloaded release identity from the local
-installation identity. The downloaded archive must match the published hash,
-size, canonical bundle ID, name and version. The signer sets the current
-Bundle.main.bundleIdentifier; the signed plist and library record must both
-match it before iOS installation begins.
+Build 430 exercises self-update from installed 4.2 build 420. Native download,
+signing, installer and identity verifier code is byte-identical to package 25.
+Only version metadata, bundled changelog and publication profile change.
 
-Existing catalog/Library flows retain their behavior. Run the macOS workflow
-and RemoteSmoke tests before device testing. See START_HERE.txt for the one-time
-migration from 4.0 and the subsequent update test.
+Upload apple-store and Online; replace the existing workflow with
+apple-store-4.3.yml and run Actions. Publish the original IPA/release.json pair
+using Online/Publish-Test-Update.cmd. Leave 4.2 installed for the test.
 
-The workflow emits corresponding source and component licenses separately.
+The canonical downloaded IPA is verified and then signed using the running
+application's Bundle ID. Do not modify the original IPA before publication.
+Device testing remains required. See START_HERE.txt. Corresponding source and
+component licenses are emitted as a separate build artifact.

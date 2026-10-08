@@ -11,7 +11,7 @@ try {
     $profile = $null
     if ($ProfilePath) {
         $profile = Get-Content -LiteralPath $ProfilePath -Raw -Encoding UTF8 | ConvertFrom-Json
-        if ($profile.version -ne $release.version -or [int]$profile.build -ne [int]$release.build) { throw 'This test publisher requires version 4.2, build 420, from this package.' }
+        if ($profile.version -ne $release.version -or [int]$profile.build -ne [int]$release.build) { throw 'This test publisher requires version 4.3, build 430, from this package.' }
         if ($profile.announcement.action -ne 'update' -or !$profile.announcement.modal -or [int]$profile.announcement.maxBuild -ne ([int]$release.build - 1)) { throw 'Invalid announcement targeting.' }
     }
     $configPath = Join-Path $PSScriptRoot 'configuration.json'
