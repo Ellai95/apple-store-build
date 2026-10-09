@@ -41,8 +41,8 @@ assert 'PRODUCT_NAME = "$(TARGET_NAME)";' not in project
 assert 'path = "Apple Store.app";' in project
 scheme = (root/'Feather.xcodeproj/xcshareddata/xcschemes/Feather.xcscheme').read_text()
 assert scheme.count('BuildableName = "Apple Store.app"') == 3
-assert project.count('CURRENT_PROJECT_VERSION = 430;')==2
-assert 'FEATHER_PROJECT_VERSION=4.3' in (root/'Feather.xcconfig').read_text()
+assert project.count('CURRENT_PROJECT_VERSION = 440;')==2
+assert 'FEATHER_PROJECT_VERSION=4.4' in (root/'Feather.xcconfig').read_text()
 assert 'FEATHER_PRODUCT_BUNDLE_IDENTIFIER=ru.ipa95.applestore' in (root/'Feather.xcconfig').read_text()
 plist=plistlib.loads((resources/'Info.plist').read_bytes())
 assert plist['CFBundleURLTypes'][0]['CFBundleURLSchemes']==['appleipa']
@@ -146,3 +146,14 @@ assert "release.bundleID == Bundle.main.bundleIdentifier" not in pipeline
 assert "guard signed.identifier == own" in pipeline
 assert "options.appIdentifier = Bundle.main.bundleIdentifier" in pipeline
 print("PASS: verified canonical source is re-signed to the installed application ID before self-update.")
+
+# Catalog X closes just that banner; modal display must not hide every banner.
+remote=(root/'Feather/AppleStore/StoreRemote.swift').read_text()
+catalog=(root/'Feather/AppleStore/StoreCatalogView.swift').read_text()
+news=(root/'Feather/AppleStore/StoreOnlineViews.swift').read_text()
+assert 'ForEach(remote.bannerNews)' in catalog and 'remote.dismissBanner(item)' in catalog
+assert 'dismissedBannerIDs = StoreNewsDismissals.dismiss(item.id)' in remote
+assert 'news.filter { !dismissedBannerIDs.contains($0.id) }' in remote
+assert 'Image(systemName: "xmark")' in news and 'accessibilityLabel("Скрыть объявление")' in news
+assert (root/'Feather/AppleStore/StoreNewsDismissals.swift').is_file()
+print('PASS: close button, observable filtering, persistent per-announcement dismissal.')
