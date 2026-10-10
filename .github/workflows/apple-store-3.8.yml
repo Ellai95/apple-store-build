@@ -1,4 +1,4 @@
-name: Apple Store 4.4
+name: Apple Store 4.5
 on:
   workflow_dispatch:
 permissions:
@@ -21,13 +21,13 @@ jobs:
           submodules: recursive
           path: source
           persist-credentials: false
-      - name: Build and verify Apple Store 4.4
+      - name: Build and verify Apple Store 4.5
         shell: bash
         run: bash customization/apple-store/build.sh
       - name: Apple Store IPA
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: Apple-Store-4.4-IPA
+          name: Apple-Store-4.5-IPA
           path: |
             source/packages/Apple Store.ipa
             source/packages/release.json
@@ -36,17 +36,17 @@ jobs:
       - name: Source and licenses for publication
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: Apple-Store-4.4-Source-and-Licenses
+          name: Apple-Store-4.5-Source-and-Licenses
           path: |
-            Apple-Store-4.4-Source.zip
-            Apple-Store-4.4-Licenses.zip
+            Apple-Store-4.5-Source.zip
+            Apple-Store-4.5-Licenses.zip
           if-no-files-found: error
           retention-days: 14
       - name: Build report
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: Apple-Store-4.4-Report
+          name: Apple-Store-4.5-Report
           path: source/build-report/
           if-no-files-found: ignore
           retention-days: 14
