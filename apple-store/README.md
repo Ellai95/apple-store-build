@@ -1,6 +1,5 @@
-# Apple Store 4.4 — package 28
+# Apple Store 4.5 — package 29
 
-Adds persistent, per-announcement catalog banner dismissal.
-Identity remains ru.ipa95.applestore / Apple Store.
-Upload apple-store and Online to repository root, replace existing workflow code
-with apple-store-4.4.yml, run main. Publish only when ready.
+Default catalog and category ordering is alphabetical. Download/sign/install code is unchanged.
+Upload apple-store and Online at the repository root, update the existing workflow with
+apple-store-4.5.yml, build in GitHub Actions, and test the resulting IPA before publication.

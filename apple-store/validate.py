@@ -41,8 +41,8 @@ assert 'PRODUCT_NAME = "$(TARGET_NAME)";' not in project
 assert 'path = "Apple Store.app";' in project
 scheme = (root/'Feather.xcodeproj/xcshareddata/xcschemes/Feather.xcscheme').read_text()
 assert scheme.count('BuildableName = "Apple Store.app"') == 3
-assert project.count('CURRENT_PROJECT_VERSION = 440;')==2
-assert 'FEATHER_PROJECT_VERSION=4.4' in (root/'Feather.xcconfig').read_text()
+assert project.count('CURRENT_PROJECT_VERSION = 450;')==2
+assert 'FEATHER_PROJECT_VERSION=4.5' in (root/'Feather.xcconfig').read_text()
 assert 'FEATHER_PRODUCT_BUNDLE_IDENTIFIER=ru.ipa95.applestore' in (root/'Feather.xcconfig').read_text()
 plist=plistlib.loads((resources/'Info.plist').read_bytes())
 assert plist['CFBundleURLTypes'][0]['CFBundleURLSchemes']==['appleipa']
@@ -157,3 +157,5 @@ assert 'news.filter { !dismissedBannerIDs.contains($0.id) }' in remote
 assert 'Image(systemName: "xmark")' in news and 'accessibilityLabel("Скрыть объявление")' in news
 assert (root/'Feather/AppleStore/StoreNewsDismissals.swift').is_file()
 print('PASS: close button, observable filtering, persistent per-announcement dismissal.')
+
+assert '@State private var sort = "По алфавиту"' in (root/'Feather/AppleStore/StoreCatalogView.swift').read_text()
