@@ -1,0 +1,29 @@
+{
+  "enabled": false,
+  "campaigns": [
+    {
+      "id": "advertisement-001",
+      "enabled": false,
+      "title": "Заголовок рекламы",
+      "text": "**Первые слова жирным.**\nОписание, эмодзи ✨ и [ссылка на канал](https://t.me/appleipa095).",
+      "imageURL": null,
+      "icon": "✨",
+      "buttons": [{"id": "open", "title": "Подробнее", "url": "https://t.me/appleipa095"}],
+      "mode": "entry",
+      "intervalSeconds": 300,
+      "priority": 0,
+      "minBuild": 460,
+      "maxBuild": null,
+      "startsAt": null,
+      "endsAt": null
+    }
+  ],
+  "purchaseEnabled": false,
+  "offers": [
+    {"id": "month", "title": "Без рекламы на месяц", "price": 0, "days": 30, "enabled": false},
+    {"id": "year", "title": "Без рекламы на год", "price": 0, "days": 365, "enabled": false}
+  ],
+  "paymentDetails": "",
+  "recipient": "https://t.me/ellai95",
+  "grants": []
+}
