@@ -5,7 +5,7 @@ import Foundation
         let timeout = NSError(domain:NSURLErrorDomain,code:NSURLErrorTimedOut,userInfo:[NSLocalizedDescriptionKey:secret,NSUnderlyingErrorKey:NSError(domain:"private",code:1)])
         let d=StoreDiagnostic.classify(timeout,stage:"downloading")
         precondition(d.category == "network.timeout")
-        let report=d.report(version:"4.8",build:470,ios:"18.0",bytes:100)
+        let report=d.report(version:"4.9",build:470,ios:"18.0",bytes:100)
         for marker in ["secret","private","https://","/Users/"] { precondition(!report.contains(marker)) }
         let disk=StoreDiagnostic.classify(NSError(domain:NSCocoaErrorDomain,code:NSFileWriteOutOfSpaceError),stage:"packaging")
         precondition(disk.category == "storage.full")

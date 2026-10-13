@@ -1,0 +1,28 @@
+{
+  "version": "4.9",
+  "build": 490,
+  "notes": [
+    "Добавлены кнопки «Открыть» и «Обновить» для установленных приложений.",
+    "Обновлены иконки PlayStation и Steam, упрощены карточки сервисов.",
+    "Сохранены все возможности Apple Store Pro."
+  ],
+  "changelog": {
+    "id": "4.9",
+    "title": "Версия 4.9",
+    "text": "Добавлены кнопки «Открыть» и «Обновить» для установленных приложений.\nОбновлены иконки PlayStation и Steam, упрощены карточки сервисов.\nСохранены все возможности Apple Store Pro."
+  },
+  "announcement": {
+    "id": "apple-store-update-4-9-490",
+    "enabled": true,
+    "title": "Доступен Apple Store 4.9",
+    "text": "Добавлены сервисы, подписки и новые возможности Pro.",
+    "button": "Обновить",
+    "action": "update",
+    "url": null,
+    "modal": true,
+    "minBuild": 400,
+    "maxBuild": 489,
+    "startsAt": null,
+    "endsAt": null
+  }
+}

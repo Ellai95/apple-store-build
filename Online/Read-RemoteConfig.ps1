@@ -1,4 +1,4 @@
-# Check the public object when rclone returns no bytes (some versions use exit 0 for a missing object).
+﻿# Check the public object when rclone returns no bytes (some versions use exit 0 for a missing object).
 function Get-StorePublicConfiguration {
     param([string]$Uri = 'https://pub-d11175355ab34b9299fb0a916702bce7.r2.dev/apple-store/configuration.json')
     Add-Type -AssemblyName System.Net.Http

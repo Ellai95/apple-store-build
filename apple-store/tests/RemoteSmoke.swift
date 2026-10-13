@@ -45,10 +45,10 @@ enum StoreVault {
         let file = directory.appendingPathComponent("Application.ipa")
         try bytes.write(to: file)
         let digest = SHA256.hash(data: bytes).map { String(format: "%02x", $0) }.joined()
-        let release = StoreRemoteDocument.Update(enabled: true, version: "4.8", build: 480, ipaURL: "https://example.com/app.ipa", sha256: digest, bundleID: "ru.ipa95.applestore", sizeBytes: Int64(bytes.count), minimumIOS: "15.0", notes: [])
+        let release = StoreRemoteDocument.Update(enabled: true, version: "4.9", build: 480, ipaURL: "https://example.com/app.ipa", sha256: digest, bundleID: "ru.ipa95.applestore", sizeBytes: Int64(bytes.count), minimumIOS: "15.0", notes: [])
         precondition(release.newer(than: 420) && !release.newer(than: 480))
         try StoreUpdateVerifier.archive(file, release: release)
-        let plist: [String: Any] = ["CFBundleIdentifier": release.bundleID, "CFBundleDisplayName": "Apple Store", "CFBundleShortVersionString": "4.8", "CFBundleVersion": "480"]
+        let plist: [String: Any] = ["CFBundleIdentifier": release.bundleID, "CFBundleDisplayName": "Apple Store", "CFBundleShortVersionString": "4.9", "CFBundleVersion": "480"]
         try PropertyListSerialization.data(fromPropertyList: plist, format: .binary, options: 0).write(to: directory.appendingPathComponent("Info.plist"))
         try StoreUpdateVerifier.sourceIdentity(directory, release: release, build: 420)
         try StoreUpdateVerifier.signedIdentity(directory, release: release, installedID: release.bundleID, build: 420)

@@ -193,7 +193,7 @@ try {
     if ((Get-FileHash -LiteralPath $readback -Algorithm SHA256).Hash -ne (Get-FileHash -LiteralPath $next -Algorithm SHA256).Hash) { throw 'Read-back verification failed. Keep the backup and report the error.' }
     if ($Mode -eq 'Grant') {
         $receipt=Join-Path $work ('access-'+$Code+'-'+(Get-Date -Format 'yyyyMMdd-HHmmss')+'.txt')
-        [IO.File]::WriteAllText($receipt,('Device: '+$Code+[Environment]::NewLine+'Expires: '+$until+[Environment]::NewLine+'Status: enabled automatically in Apple Store 4.8'+[Environment]::NewLine),$utf8)
+        [IO.File]::WriteAllText($receipt,('Device: '+$Code+[Environment]::NewLine+'Expires: '+$until+[Environment]::NewLine+'Status: enabled automatically in Apple Store 4.9'+[Environment]::NewLine),$utf8)
         Write-Host ('DONE. Pro enabled until '+$until) -ForegroundColor Green
         Write-Host 'The client only needs to refresh access in Apple Store. No activation code is required.'
     }
