@@ -31,12 +31,16 @@ enum StoreVault {
         precondition(!news.active(build: 399) && news.active(build: 400) && !news.active(build: 411))
         let profileData = try Data(contentsOf: URL(fileURLWithPath: CommandLine.arguments[2]))
         let profile = try JSONSerialization.jsonObject(with: profileData) as! [String: Any]
+        let releaseBuild = profile["build"] as! Int
+        let releaseVersion = profile["version"] as! String
         var announcementFixture = initial
         announcementFixture["news"] = [profile["announcement"]!]
         let targeted = try StoreRemoteDocument.decode(JSONSerialization.data(withJSONObject: announcementFixture))
         precondition(targeted.news.count == 1)
         precondition(targeted.news[0].active(build: 430))
-        precondition(!targeted.news[0].active(build: 480))
+        precondition(targeted.news[0].maxBuild == releaseBuild - 1)
+        precondition(targeted.news[0].active(build: releaseBuild - 1))
+        precondition(!targeted.news[0].active(build: releaseBuild))
         precondition(targeted.news[0].modal && targeted.news[0].action == "update")
         let directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
@@ -45,10 +49,10 @@ enum StoreVault {
         let file = directory.appendingPathComponent("Application.ipa")
         try bytes.write(to: file)
         let digest = SHA256.hash(data: bytes).map { String(format: "%02x", $0) }.joined()
-        let release = StoreRemoteDocument.Update(enabled: true, version: "4.9", build: 480, ipaURL: "https://example.com/app.ipa", sha256: digest, bundleID: "ru.ipa95.applestore", sizeBytes: Int64(bytes.count), minimumIOS: "15.0", notes: [])
-        precondition(release.newer(than: 420) && !release.newer(than: 480))
+        let release = StoreRemoteDocument.Update(enabled: true, version: releaseVersion, build: releaseBuild, ipaURL: "https://example.com/app.ipa", sha256: digest, bundleID: "ru.ipa95.applestore", sizeBytes: Int64(bytes.count), minimumIOS: "15.0", notes: [])
+        precondition(release.newer(than: releaseBuild - 1) && !release.newer(than: releaseBuild))
         try StoreUpdateVerifier.archive(file, release: release)
-        let plist: [String: Any] = ["CFBundleIdentifier": release.bundleID, "CFBundleDisplayName": "Apple Store", "CFBundleShortVersionString": "4.9", "CFBundleVersion": "480"]
+        let plist: [String: Any] = ["CFBundleIdentifier": release.bundleID, "CFBundleDisplayName": "Apple Store", "CFBundleShortVersionString": releaseVersion, "CFBundleVersion": String(releaseBuild)]
         try PropertyListSerialization.data(fromPropertyList: plist, format: .binary, options: 0).write(to: directory.appendingPathComponent("Info.plist"))
         try StoreUpdateVerifier.sourceIdentity(directory, release: release, build: 420)
         try StoreUpdateVerifier.signedIdentity(directory, release: release, installedID: release.bundleID, build: 420)
@@ -66,7 +70,7 @@ enum StoreVault {
         try StoreUpdateVerifier.signedIdentity(directory, release: release, installedID: renamedID, build: 420)
         do { try StoreUpdateVerifier.sourceIdentity(directory, release: release, build: 420); fatalError("Modified original download accepted") } catch StoreUpdateVerifier.Failure.identity { }
         do { try StoreUpdateVerifier.signedIdentity(directory, release: release, installedID: "different.app", build: 420); fatalError("Wrong signed ID accepted") } catch StoreUpdateVerifier.Failure.identity { }
-        do { try StoreUpdateVerifier.signedIdentity(directory, release: release, installedID: renamedID, build: 480); fatalError("Same build accepted as an update") } catch StoreUpdateVerifier.Failure.identity { }
+        do { try StoreUpdateVerifier.signedIdentity(directory, release: release, installedID: renamedID, build: releaseBuild); fatalError("Same build accepted as an update") } catch StoreUpdateVerifier.Failure.identity { }
         renamed["CFBundleVersion"] = "441"
         try writePlist(renamed)
         do { try StoreUpdateVerifier.signedIdentity(directory, release: release, installedID: renamedID, build: 420); fatalError("Wrong build accepted") } catch StoreUpdateVerifier.Failure.identity { }
