@@ -1,0 +1,124 @@
+{
+  "enabled": true,
+  "pro": {
+    "enabled": true,
+    "features": {
+      "customWallpaper": true,
+      "noAds": true,
+      "premiumThemes": true
+    },
+    "grants": [],
+    "offers": [
+      {
+        "days": 30,
+        "enabled": false,
+        "id": "month",
+        "price": 0,
+        "title": "Apple Store Pro · месяц"
+      },
+      {
+        "days": 365,
+        "enabled": false,
+        "id": "year",
+        "price": 0,
+        "title": "Apple Store Pro · год"
+      }
+    ],
+    "paymentDetails": "",
+    "purchaseEnabled": false,
+    "recipient": "https://t.me/ellai95",
+    "testing": false
+  },
+  "themes": [
+    {
+      "accent": "#1964F5",
+      "dark": false,
+      "darkBackground": "#070A12",
+      "darkSurface": "#151B29",
+      "id": "classic",
+      "lightBackground": "#F6F8FC",
+      "lightSurface": "#FFFFFF",
+      "requiresPro": false,
+      "secondary": "#ED2E4F",
+      "style": "solid",
+      "subtitle": "Светлая тема и синие акценты",
+      "title": "Classic",
+      "imageURL": null
+    },
+    {
+      "accent": "#58ACFF",
+      "dark": true,
+      "darkBackground": "#02040A",
+      "darkSurface": "#121825",
+      "id": "midnight",
+      "lightBackground": "#F6F8FC",
+      "lightSurface": "#FFFFFF",
+      "requiresPro": false,
+      "secondary": "#C296FF",
+      "style": "solid",
+      "subtitle": "Графит и мягкое голубое свечение",
+      "title": "Midnight",
+      "imageURL": null
+    },
+    {
+      "accent": "#63E6D2",
+      "dark": true,
+      "darkBackground": "#061327",
+      "darkSurface": "#112337",
+      "id": "aurora",
+      "lightBackground": "#F6F8FC",
+      "lightSurface": "#FFFFFF",
+      "requiresPro": true,
+      "secondary": "#CB9BFF",
+      "style": "aurora",
+      "subtitle": "Северное сияние на фоне",
+      "title": "Aurora",
+      "imageURL": null
+    },
+    {
+      "accent": "#EAC66B",
+      "dark": true,
+      "darkBackground": "#080705",
+      "darkSurface": "#252017",
+      "id": "black-gold",
+      "lightBackground": "#F6F8FC",
+      "lightSurface": "#FFFFFF",
+      "requiresPro": true,
+      "secondary": "#FFDDA0",
+      "style": "gold",
+      "subtitle": "Золотые линии на чёрном фоне",
+      "title": "Black Gold",
+      "imageURL": null
+    },
+    {
+      "accent": "#76D8FF",
+      "dark": true,
+      "darkBackground": "#071C35",
+      "darkSurface": "#102E4A",
+      "id": "ocean",
+      "lightBackground": "#F6F8FC",
+      "lightSurface": "#FFFFFF",
+      "requiresPro": true,
+      "secondary": "#93AEFF",
+      "style": "ocean",
+      "subtitle": "Глубокий синий и морские волны",
+      "title": "Ocean",
+      "imageURL": null
+    },
+    {
+      "accent": "#1964F5",
+      "dark": false,
+      "darkBackground": "#080D17",
+      "darkSurface": "#172233",
+      "id": "custom",
+      "lightBackground": "#F6F8FC",
+      "lightSurface": "#FFFFFF",
+      "requiresPro": true,
+      "secondary": "#ED2E4F",
+      "style": "custom",
+      "subtitle": "Ваше фото, цвет и прозрачность",
+      "title": "Свои обои",
+      "imageURL": null
+    }
+  ]
+}

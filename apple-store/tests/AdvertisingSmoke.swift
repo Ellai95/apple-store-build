@@ -28,27 +28,27 @@ enum StoreVault {
         let now = ISO8601DateFormatter().date(from: "2026-10-11T20:00:00Z")!
         var policy = StoreAdvertisingPolicy()
         precondition(policy.candidate(document: doc, build: 459, code: code, now: now, seen: []) == nil)
-        let c = policy.candidate(document: doc, build: 460, code: code, now: now, seen: [])!
+        let c = policy.candidate(document: doc, build: 470, code: code, now: now, seen: [])!
         policy.shown(c, at: now)
-        precondition(policy.candidate(document: doc, build: 460, code: code, now: now.addingTimeInterval(301), seen: []) == nil)
+        precondition(policy.candidate(document: doc, build: 470, code: code, now: now.addingTimeInterval(301), seen: []) == nil)
         policy.newEntry()
-        precondition(policy.candidate(document: doc, build: 460, code: code, now: now.addingTimeInterval(301), seen: []) != nil)
+        precondition(policy.candidate(document: doc, build: 470, code: code, now: now.addingTimeInterval(301), seen: []) != nil)
         campaign["mode"] = "interval"; ads["campaigns"] = [campaign]
         let interval = try decode(ads); var repeatPolicy = StoreAdvertisingPolicy()
         repeatPolicy.shown(interval.campaigns[0], at: now)
-        precondition(repeatPolicy.candidate(document: interval, build: 460, code: code, now: now.addingTimeInterval(299), seen: []) == nil)
-        precondition(repeatPolicy.candidate(document: interval, build: 460, code: code, now: now.addingTimeInterval(300), seen: []) != nil)
+        precondition(repeatPolicy.candidate(document: interval, build: 470, code: code, now: now.addingTimeInterval(299), seen: []) == nil)
+        precondition(repeatPolicy.candidate(document: interval, build: 470, code: code, now: now.addingTimeInterval(300), seen: []) != nil)
         campaign["mode"] = "once"; ads["campaigns"] = [campaign]
         let once = try decode(ads); let fresh = StoreAdvertisingPolicy()
-        precondition(fresh.candidate(document: once, build: 460, code: code, now: now, seen: [campaign["id"] as! String]) == nil)
+        precondition(fresh.candidate(document: once, build: 470, code: code, now: now, seen: [campaign["id"] as! String]) == nil)
         ads["grants"] = [["code":code,"expiresAt":"2026-11-11T20:00:00Z"]]
         let exempt = try decode(ads)
-        precondition(fresh.candidate(document: exempt, build: 460, code: code, now: now, seen: []) == nil)
-        precondition(fresh.candidate(document: exempt, build: 460, code: other, now: now, seen: []) != nil)
+        precondition(fresh.candidate(document: exempt, build: 470, code: code, now: now, seen: []) == nil)
+        precondition(fresh.candidate(document: exempt, build: 470, code: other, now: now, seen: []) != nil)
         precondition(exempt.adFreeUntil(code: code, now: now.addingTimeInterval(40*86400)) == nil)
         ads["enabled"] = false
         let stopped = try decode(ads)
-        precondition(fresh.candidate(document: stopped, build: 460, code: other, now: now, seen: []) == nil)
+        precondition(fresh.candidate(document: stopped, build: 470, code: other, now: now, seen: []) == nil)
         func reject(_ mutation: (inout [String: Any]) -> Void) throws {
             var bad = ads; mutation(&bad)
             do { _ = try decode(bad); fatalError("Unsafe advertising configuration accepted") }

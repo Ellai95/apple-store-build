@@ -1,0 +1,26 @@
+{
+  "version": "4.7",
+  "build": 470,
+  "notes": [
+    "Темы оформления, свои обои и улучшенная диагностика ошибок."
+  ],
+  "changelog": {
+    "id": "4.7",
+    "title": "Версия 4.7",
+    "text": "Темы оформления, свои обои и улучшенная диагностика ошибок."
+  },
+  "announcement": {
+    "id": "apple-store-update-4-7-470",
+    "enabled": true,
+    "title": "Доступен Apple Store 4.7",
+    "text": "Новая версия: темы оформления, свои обои и улучшенная диагностика ошибок. Обновите Apple Store в настройках.",
+    "button": "Обновить",
+    "action": "update",
+    "url": null,
+    "modal": true,
+    "minBuild": 400,
+    "maxBuild": 469,
+    "startsAt": null,
+    "endsAt": null
+  }
+}

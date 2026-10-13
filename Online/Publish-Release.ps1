@@ -11,7 +11,7 @@ try {
     $profile = $null
     if ($ProfilePath) {
         $profile = Get-Content -LiteralPath $ProfilePath -Raw -Encoding UTF8 | ConvertFrom-Json
-        if ($profile.version -ne $release.version -or [int]$profile.build -ne [int]$release.build) { throw 'This test publisher requires version 4.5, build 450, from this package.' }
+        if ($profile.version -ne $release.version -or [int]$profile.build -ne [int]$release.build) { throw 'This test publisher requires version 4.7, build 470, from this package.' }
         if ($profile.announcement.action -ne 'update' -or !$profile.announcement.modal -or [int]$profile.announcement.maxBuild -ne ([int]$release.build - 1)) { throw 'Invalid announcement targeting.' }
     }
     $configPath = Join-Path $PSScriptRoot 'configuration.json'
@@ -36,6 +36,7 @@ try {
         if (@($config.layout.home) -notcontains 'news') { $config.layout.home = @($config.layout.home) + @('news') }
         if (@($config.layout.settings) -notcontains 'update') { $config.layout.settings = @($config.layout.settings) + @('update') }
     }
+    if ([int]$release.build -ge 470 -and ($null -eq $config.personalization -or $config.personalization.pro.testing)) { throw 'Before public release, run Publish-Themes.cmd with pro.testing=false and grant your own code. Preview access must not be published.' }
     $name = "Apple-Store-$($release.version)-$($release.build).ipa"
     $key = "apple-store/releases/$name"
     # Immutable versioned key: publishing new metadata never redirects an active download to another IPA.
