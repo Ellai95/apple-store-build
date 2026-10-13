@@ -10,7 +10,7 @@ enum StoreVault {
         precondition(old.personalization == nil)
         let preview = StorePersonalizationDocument.preview
         try preview.validate()
-        precondition(preview.themes.count == 6 && preview.themes.contains { $0.style == "custom" })
+        precondition(preview.themes.count == 7 && preview.themes.contains { $0.style == "custom" })
         precondition(!preview.pro.testing && !preview.pro.purchaseEnabled)
         let code = String(repeating:"A",count:32); let other = String(repeating:"B",count:32)
         precondition(!preview.pro.allows("premiumThemes",code:code))
@@ -18,20 +18,16 @@ enum StoreVault {
         let activationHash = String(repeating:"c",count:64)
         let expiry = ISO8601DateFormatter().string(from:now.addingTimeInterval(30*86400))
         let pro = StorePersonalizationDocument.Pro(enabled:true,testing:false,purchaseEnabled:false,offers:[],paymentDetails:"",recipient:"https://t.me/ellai95",grants:[.init(code:code,expiresAt:expiry,features:["premiumThemes","noAds"],activationHash:activationHash)],features:["premiumThemes":true,"customWallpaper":true,"noAds":true])
-        precondition(pro.allows("premiumThemes",code:code,activatedHash:activationHash,now:now))
-        precondition(!pro.allows("premiumThemes",code:code,now:now))
-        precondition(!pro.allows("premiumThemes",code:code,activatedHash:String(repeating:"d",count:64),now:now))
-        precondition(StoreProActivation.normalized("PRO-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA-AAAA") == String(repeating:"A",count:32))
-        precondition(StoreProActivation.normalized("wrong") == nil)
-        precondition(!pro.allows("premiumThemes",code:other,activatedHash:activationHash,now:now))
-        precondition(!pro.allows("customWallpaper",code:code,activatedHash:activationHash,now:now))
-        precondition(!pro.allows("noAds",code:code,activatedHash:activationHash,now:now.addingTimeInterval(31*86400)))
+        precondition(pro.allows("premiumThemes",code:code,now:now))
+        precondition(!pro.allows("premiumThemes",code:other,now:now))
+        precondition(!pro.allows("customWallpaper",code:code,now:now))
+        precondition(!pro.allows("noAds",code:code,now:now.addingTimeInterval(31*86400)))
         var root = try JSONSerialization.jsonObject(with:legacy) as! [String:Any]
         let encoder = JSONEncoder(); encoder.outputFormatting = [.prettyPrinted,.sortedKeys]
         var obj = try JSONSerialization.jsonObject(with:encoder.encode(preview)) as! [String:Any]
         root["personalization"] = obj
         let decoded = try StoreRemoteDocument.decode(JSONSerialization.data(withJSONObject:root))
-        precondition(decoded.personalization?.themes.count == 6)
+        precondition(decoded.personalization?.themes.count == 7)
         func reject(_ mutate:(inout [String:Any])->Void) throws {
             var value = obj; mutate(&value); var document = root; document["personalization"] = value
             do { _ = try StoreRemoteDocument.decode(JSONSerialization.data(withJSONObject:document)); fatalError("Unsafe theme accepted") } catch { }
@@ -47,6 +43,6 @@ enum StoreVault {
         let production = try JSONDecoder().decode(StorePersonalizationDocument.self,from:JSONSerialization.data(withJSONObject:obj))
         try production.validate()
         if CommandLine.arguments.count > 2 { try JSONSerialization.data(withJSONObject:obj,options:[.prettyPrinted,.sortedKeys]).write(to:URL(fileURLWithPath:CommandLine.arguments[2])) }
-        print("PASS: legacy config, 6 themes, per-code Pro/expiry/feature gates, image/colors validation, safe preview/production split.")
+        print("PASS: legacy config, 7 themes, per-code Pro/expiry/feature gates, image/colors validation, safe preview/production split.")
     }
 }

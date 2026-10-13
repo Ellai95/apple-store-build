@@ -10,24 +10,23 @@
     "grants": [],
     "offers": [
       {
-        "days": 30,
-        "enabled": false,
-        "id": "month",
-        "price": 0,
-        "title": "Apple Store Pro · месяц"
-      },
-      {
-        "days": 365,
-        "enabled": false,
         "id": "year",
-        "price": 0,
-        "title": "Apple Store Pro · год"
+        "title": "Apple Store Pro · год",
+        "price": 300,
+        "days": 365,
+        "enabled": true
       }
     ],
-    "paymentDetails": "",
-    "purchaseEnabled": false,
+    "paymentDetails": "Т-Банк\nПолучатель: Зульфия М.\nКарта: 2200 7020 3580 5600\nСБП: +7 966 720-22-20\nПри переводе через СБП выберите Т-Банк.",
+    "purchaseEnabled": true,
     "recipient": "https://t.me/ellai95",
-    "testing": false
+    "testing": false,
+    "payment": {
+      "bank": "Т-Банк",
+      "cardNumber": "2200702035805600",
+      "phone": "+79667202220",
+      "holder": "Зульфия М."
+    }
   },
   "themes": [
     {
@@ -119,6 +118,185 @@
       "subtitle": "Ваше фото, цвет и прозрачность",
       "title": "Свои обои",
       "imageURL": null
+    },
+    {
+      "accent": "#3669DF",
+      "dark": false,
+      "darkBackground": "#090D1C",
+      "darkSurface": "#152038",
+      "id": "liquid-glass",
+      "lightBackground": "#F6F8FC",
+      "lightSurface": "#FFFFFF",
+      "requiresPro": true,
+      "secondary": "#A35DE4",
+      "style": "aurora",
+      "subtitle": "Стекло и медленное слияние цветов",
+      "title": "Liquid Glass",
+      "imageURL": null,
+      "glass": true
     }
-  ]
+  ],
+  "extras": {
+    "earlyAccess": true,
+    "parallelDownloads": true,
+    "glassTheme": true,
+    "featureRequests": true,
+    "earlyReleases": [],
+    "deviceOverrides": []
+  },
+  "services": {
+    "enabled": true,
+    "products": [
+      {
+        "category": "Игры",
+        "color": "#3159DE",
+        "description": "Выберите подписку на один год. Перед оформлением согласуем регион и способ подключения.",
+        "enabled": true,
+        "id": "playstation",
+        "monogram": "PS",
+        "plans": [
+          {
+            "detail": "50+ игр",
+            "enabled": true,
+            "id": "ea-play",
+            "period": "1 год",
+            "price": 2500,
+            "title": "EA Play"
+          },
+          {
+            "detail": "300+ игр",
+            "enabled": true,
+            "id": "extra",
+            "period": "1 год",
+            "price": 4500,
+            "title": "PlayStation Plus Extra"
+          },
+          {
+            "detail": "800+ игр",
+            "enabled": true,
+            "id": "deluxe",
+            "period": "1 год",
+            "price": 5500,
+            "title": "PlayStation Plus Deluxe"
+          },
+          {
+            "detail": "1000+ игр",
+            "enabled": true,
+            "id": "ea-deluxe",
+            "period": "1 год",
+            "previousPrice": 8000,
+            "price": 6500,
+            "title": "EA Play + Deluxe"
+          }
+        ],
+        "platforms": [
+          "PS4",
+          "PS5"
+        ],
+        "subtitle": "Подписки для PS4 и PS5",
+        "symbol": "gamecontroller.fill",
+        "title": "PlayStation"
+      },
+      {
+        "category": "Нейросети",
+        "color": "#168477",
+        "description": "Выберите тариф на один месяц. Условия подключения и доступные возможности уточняются при оформлении.",
+        "enabled": true,
+        "id": "chatgpt",
+        "monogram": "GPT",
+        "plans": [
+          {
+            "detail": "Подписка ChatGPT Go",
+            "enabled": true,
+            "id": "go",
+            "period": "1 месяц",
+            "price": 1200,
+            "title": "Go"
+          },
+          {
+            "detail": "Подписка ChatGPT Plus",
+            "enabled": true,
+            "id": "plus",
+            "period": "1 месяц",
+            "price": 2500,
+            "title": "Plus"
+          }
+        ],
+        "platforms": [],
+        "subtitle": "Ваш помощник для работы и идей",
+        "symbol": "sparkles",
+        "title": "ChatGPT"
+      },
+      {
+        "category": "Нейросети",
+        "color": "#536AD8",
+        "description": "Подписка Gemini Pro на 18 месяцев. Оформление через разработчика Apple IPA.",
+        "enabled": true,
+        "id": "gemini",
+        "monogram": "G",
+        "plans": [
+          {
+            "detail": "Подписка Gemini Pro",
+            "enabled": true,
+            "id": "pro",
+            "period": "18 месяцев",
+            "price": 1500,
+            "title": "Pro"
+          }
+        ],
+        "platforms": [],
+        "subtitle": "Инструменты Google для ваших задач",
+        "symbol": "brain.head.profile",
+        "title": "Gemini"
+      },
+      {
+        "category": "Монтаж",
+        "color": "#51576B",
+        "description": "Подписка CapCut Pro на один месяц. Уточните способ подключения при заказе.",
+        "enabled": true,
+        "id": "capcut",
+        "monogram": "CC",
+        "plans": [
+          {
+            "detail": "Подписка CapCut Pro",
+            "enabled": true,
+            "id": "pro",
+            "period": "1 месяц",
+            "price": 1000,
+            "title": "Pro"
+          }
+        ],
+        "platforms": [],
+        "subtitle": "Создавайте видео с Pro-подпиской",
+        "symbol": "scissors",
+        "title": "CapCut"
+      },
+      {
+        "category": "Игры",
+        "color": "#256681",
+        "description": "Набор из 100 тысяч игр. Подписка навсегда. Способ подключения и состав набора согласуем при оформлении. Обложка иллюстрирует игровые жанры; наличие конкретной игры уточняйте перед заказом.",
+        "enabled": true,
+        "id": "steam",
+        "monogram": "S",
+        "plans": [
+          {
+            "detail": "100 тысяч игр · подписка навсегда",
+            "enabled": true,
+            "id": "games",
+            "period": "Навсегда",
+            "price": 2000,
+            "title": "Набор игр"
+          }
+        ],
+        "platforms": [
+          "PC"
+        ],
+        "subtitle": "100 тысяч игр для вашего ПК",
+        "symbol": "desktopcomputer",
+        "title": "Набор игр Steam"
+      }
+    ],
+    "subtitle": "Подписки, игры и услуги Apple IPA",
+    "title": "Сервисы"
+  }
 }

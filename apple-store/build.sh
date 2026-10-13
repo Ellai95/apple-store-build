@@ -11,7 +11,7 @@ with zipfile.ZipFile('customization/apple-store/payload.zip') as z:
     assert all(n.startswith('overlay/') and '..' not in Path(n).parts for n in names)
     for file in ['StoreThemes.swift','StorePersonalizationData.swift','StoreDiagnosticsData.swift','StoreDiagnosticsView.swift']:
         assert 'overlay/Feather/AppleStore/'+file in names
-print('PASS: complete overlay and 4.7 source files')
+print('PASS: complete overlay and 4.8 source files')
 ZIPCHECK
 
 # Select Xcode
@@ -31,7 +31,7 @@ text = subprocess.check_output(['xcodebuild', '-version'], text=True)
 assert tuple(map(int, re.search(r'Xcode (\d+)\.(\d+)', text).groups())) >= (26, 3), 'Xcode 26.3+ required'
 PY
 
-# Prepare Apple Store 4.7
+# Prepare Apple Store 4.8
 set -euo pipefail
 if [ ! -f customization/apple-store/prepare.py ]; then
   echo 'Upload apple-store folder at repository ROOT, alongside README.md.' | tee source/build-report/prepare.log
@@ -46,22 +46,39 @@ source/build-report/vault-smoke source | tee source/build-report/vault-smoke.log
 git -C customization rev-parse HEAD > source/build-report/customization-commit.txt
 git -C source diff > source/build-report/source-changes.patch
 xcrun swiftc -frontend -parse source/Feather/AppleStore/*.swift
+xcrun swiftc -swift-version 5 -parse-as-library source/Feather/AppleStore/StoreCatalogData.swift source/Feather/AppleStore/StoreRemoteData.swift source/Feather/AppleStore/StoreAdvertisingData.swift source/Feather/AppleStore/StorePersonalizationData.swift source/Feather/AppleStore/StoreProExtrasData.swift customization/apple-store/tests/ServicesSmoke.swift -o source/build-report/services-smoke
+source/build-report/services-smoke customization/Online/configuration.json | tee source/build-report/services-smoke.log
 xcrun swiftc -swift-version 5 -D STORE_VAULT_TESTS source/Feather/AppleStore/StoreVault.swift source/Feather/AppleStore/StoreCatalogData.swift customization/apple-store/tests/main.swift -o source/build-report/catalog-tests
 source/build-report/catalog-tests source/build-report/plain-catalog.json source/Feather/Resources/StoreData.bin | tee source/build-report/catalog-tests.log
 
 # Validate remote documents, deep links, release identity and archive integrity.
-xcrun swiftc -swift-version 5 -parse-as-library source/Feather/AppleStore/StoreCatalogData.swift source/Feather/AppleStore/StoreRemoteData.swift source/Feather/AppleStore/StoreAdvertisingData.swift source/Feather/AppleStore/StorePersonalizationData.swift source/Feather/AppleStore/StoreUpdateVerifier.swift customization/apple-store/tests/RemoteSmoke.swift -o source/build-report/remote-smoke
-source/build-report/remote-smoke customization/Online/configuration.json customization/Online/release-4.7.json | tee source/build-report/remote-smoke.log
+xcrun swiftc -swift-version 5 -parse-as-library source/Feather/AppleStore/StoreCatalogData.swift source/Feather/AppleStore/StoreRemoteData.swift source/Feather/AppleStore/StoreAdvertisingData.swift source/Feather/AppleStore/StorePersonalizationData.swift source/Feather/AppleStore/StoreProExtrasData.swift source/Feather/AppleStore/StoreUpdateVerifier.swift customization/apple-store/tests/RemoteSmoke.swift -o source/build-report/remote-smoke
+source/build-report/remote-smoke customization/Online/configuration.json customization/Online/release-4.8.json | tee source/build-report/remote-smoke.log
 
 # Validate advertising scheduling, schema and per-installation exemptions.
-xcrun swiftc -swift-version 5 -parse-as-library source/Feather/AppleStore/StoreCatalogData.swift source/Feather/AppleStore/StoreRemoteData.swift source/Feather/AppleStore/StoreAdvertisingData.swift source/Feather/AppleStore/StorePersonalizationData.swift customization/apple-store/tests/AdvertisingSmoke.swift -o source/build-report/advertising-smoke
+xcrun swiftc -swift-version 5 -parse-as-library source/Feather/AppleStore/StoreCatalogData.swift source/Feather/AppleStore/StoreRemoteData.swift source/Feather/AppleStore/StoreAdvertisingData.swift source/Feather/AppleStore/StorePersonalizationData.swift source/Feather/AppleStore/StoreProExtrasData.swift customization/apple-store/tests/AdvertisingSmoke.swift -o source/build-report/advertising-smoke
 source/build-report/advertising-smoke customization/Online/configuration.json customization/Online/Advertising.json | tee source/build-report/advertising-smoke.log
 
 # Exact shipping theme/Pro decoder and privacy-safe diagnostics.
-xcrun swiftc -swift-version 5 -parse-as-library source/Feather/AppleStore/StoreCatalogData.swift source/Feather/AppleStore/StoreRemoteData.swift source/Feather/AppleStore/StoreAdvertisingData.swift source/Feather/AppleStore/StorePersonalizationData.swift customization/apple-store/tests/PersonalizationSmoke.swift -o source/build-report/personalization-smoke
+xcrun swiftc -swift-version 5 -parse-as-library source/Feather/AppleStore/StoreCatalogData.swift source/Feather/AppleStore/StoreRemoteData.swift source/Feather/AppleStore/StoreAdvertisingData.swift source/Feather/AppleStore/StorePersonalizationData.swift source/Feather/AppleStore/StoreProExtrasData.swift customization/apple-store/tests/PersonalizationSmoke.swift -o source/build-report/personalization-smoke
 source/build-report/personalization-smoke customization/Online/configuration.json | tee source/build-report/personalization-smoke.log
 xcrun swiftc -swift-version 5 -parse-as-library source/Feather/AppleStore/StoreDiagnosticsData.swift customization/apple-store/tests/DiagnosticsSmoke.swift -o source/build-report/diagnostics-smoke
 source/build-report/diagnostics-smoke | tee source/build-report/diagnostics-smoke.log
+
+# Manual checkout cannot grant access; early audiences and the five-slot limit are validated.
+xcrun swiftc -swift-version 5 -parse-as-library source/Feather/AppleStore/StoreCatalogData.swift source/Feather/AppleStore/StoreRemoteData.swift source/Feather/AppleStore/StoreAdvertisingData.swift source/Feather/AppleStore/StorePersonalizationData.swift source/Feather/AppleStore/StoreProExtrasData.swift source/Feather/AppleStore/StoreProPurchaseData.swift customization/apple-store/tests/ProCheckoutSmoke.swift -o source/build-report/pro-checkout-smoke
+source/build-report/pro-checkout-smoke customization/Online/configuration.json customization/Online/Personalization.json | tee source/build-report/pro-checkout-smoke.log
+
+# Exercise the exact queue coordinator with deterministic transport/installer fixtures.
+python3 - <<'QUEUE'
+from pathlib import Path
+code=Path('source/Feather/AppleStore/StoreProDownloads.swift').read_text()
+start=code.index('@MainActor final class StoreProDownloads')
+end=code.index('\nstruct StoreProQueueView:',start)
+Path('source/build-report/ProQueueActual.swift').write_text(Path('customization/apple-store/tests/ProQueueSmoke.swift').read_text()+'\n'+code[start:end])
+QUEUE
+xcrun swiftc -swift-version 5 -parse-as-library source/Feather/AppleStore/StoreCatalogData.swift source/Feather/AppleStore/StoreRemoteData.swift source/Feather/AppleStore/StoreAdvertisingData.swift source/Feather/AppleStore/StorePersonalizationData.swift source/Feather/AppleStore/StoreProExtrasData.swift source/Feather/AppleStore/StoreDiagnosticsData.swift source/build-report/ProQueueActual.swift -o source/build-report/pro-queue-smoke
+source/build-report/pro-queue-smoke | tee source/build-report/pro-queue-smoke.log
 
 # Verify banner close persistence and isolation from modal presentation history.
 xcrun swiftc -swift-version 5 -parse-as-library source/Feather/AppleStore/StoreNewsDismissals.swift customization/apple-store/tests/NewsDismissalSmoke.swift -o source/build-report/news-dismissal-smoke
@@ -123,17 +140,17 @@ from pathlib import Path
 import zipfile
 root=Path('source')
 excluded={'.git','_build','packages','deps','build-report'}
-with zipfile.ZipFile('Apple-Store-4.7-Source.zip','w',zipfile.ZIP_DEFLATED) as z:
+with zipfile.ZipFile('Apple-Store-4.8-Source.zip','w',zipfile.ZIP_DEFLATED) as z:
     for p in root.rglob('*'):
         rel=p.relative_to(root)
         if p.is_file() and not any(part in excluded for part in rel.parts) and rel.name != 'cert.json':
-            z.write(p,Path('Apple-Store-4.7-Source')/rel)
+            z.write(p,Path('Apple-Store-4.8-Source')/rel)
     for p in Path('customization/apple-store').rglob('*'):
         if p.is_file(): z.write(p,Path('BuildCustomization/apple-store')/p.relative_to('customization/apple-store'))
     for p in Path('customization/Online').rglob('*'):
         if p.is_file(): z.write(p,Path('BuildCustomization/Online')/p.relative_to('customization/Online'))
-    workflow=Path('customization/apple-store-4.7.yml')
-    if workflow.exists(): z.write(workflow,Path('BuildCustomization/apple-store-4.7.yml'))
+    workflow=Path('customization/apple-store-4.8.yml')
+    if workflow.exists(): z.write(workflow,Path('BuildCustomization/apple-store-4.8.yml'))
 PY
 
-python3 customization/apple-store/package-licenses.py source Apple-Store-4.7-Licenses.zip
+python3 customization/apple-store/package-licenses.py source Apple-Store-4.8-Licenses.zip

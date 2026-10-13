@@ -1,0 +1,28 @@
+{
+  "version": "4.8",
+  "build": 480,
+  "notes": [
+    "Добавлен раздел «Сервисы»: PlayStation, ChatGPT, Gemini, CapCut и набор игр Steam.",
+    "Выбор тарифов и оформление заказа через Telegram или WhatsApp.",
+    "Расширены возможности Pro и упрощена активация."
+  ],
+  "changelog": {
+    "id": "4.8",
+    "title": "Версия 4.8",
+    "text": "Добавлен раздел «Сервисы»: PlayStation, ChatGPT, Gemini, CapCut и набор игр Steam.\nВыбор тарифов и оформление заказа через Telegram или WhatsApp.\nРасширены возможности Pro и упрощена активация."
+  },
+  "announcement": {
+    "id": "apple-store-update-4-8-480",
+    "enabled": true,
+    "title": "Доступен Apple Store 4.8",
+    "text": "Добавлены сервисы, подписки и новые возможности Pro.",
+    "button": "Обновить",
+    "action": "update",
+    "url": null,
+    "modal": true,
+    "minBuild": 400,
+    "maxBuild": 479,
+    "startsAt": null,
+    "endsAt": null
+  }
+}

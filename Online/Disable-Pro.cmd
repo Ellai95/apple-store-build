@@ -1,3 +1,7 @@
 @echo off
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0Admin-Pro.ps1" -Mode Disable
+echo Apple Store Pro manager starting...
+set "HTTPS_PROXY="
+set "HTTP_PROXY="
+set "ALL_PROXY="
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0Admin-Pro.ps1" -Mode Disable -Days 365
 pause
