@@ -6,8 +6,8 @@ from urllib.parse import urlparse, unquote
 root=Path(sys.argv[1]);resources=root/'Feather/Resources';assets=resources/'Assets.xcassets'
 doc=json.loads((resources/'AppleStoreCatalog.json').read_text()); apps=doc['apps']
 assert doc['schemaVersion']==1 and doc['contacts']['whatsapp']=='https://wa.me/79667202220'
-assert len(apps)==201 and len({a['id'] for a in apps})==201
-assert sum(bool(a['ipaUrl']) for a in apps)==197
+assert len(apps)==202 and len({a['id'] for a in apps})==202
+assert sum(bool(a['ipaUrl']) for a in apps)==198
 for app in apps:
     for key in ['id','name','category','subtitle','description','version','size','ipaUrl','kind','searchTerms','addedAt','updatedAt']:
         assert isinstance(app[key],str),(app['id'],key)
@@ -41,8 +41,8 @@ assert 'PRODUCT_NAME = "$(TARGET_NAME)";' not in project
 assert 'path = "Apple Store.app";' in project
 scheme = (root/'Feather.xcodeproj/xcshareddata/xcschemes/Feather.xcscheme').read_text()
 assert scheme.count('BuildableName = "Apple Store.app"') == 3
-assert project.count('CURRENT_PROJECT_VERSION = 490;')==2
-assert 'FEATHER_PROJECT_VERSION=4.9' in (root/'Feather.xcconfig').read_text()
+assert project.count('CURRENT_PROJECT_VERSION = 491;')==2
+assert 'FEATHER_PROJECT_VERSION=4.10' in (root/'Feather.xcconfig').read_text()
 assert 'FEATHER_PRODUCT_BUNDLE_IDENTIFIER=ru.ipa95.applestore' in (root/'Feather.xcconfig').read_text()
 plist=plistlib.loads((resources/'Info.plist').read_bytes())
 assert plist['CFBundleURLTypes'][0]['CFBundleURLSchemes']==['appleipa']

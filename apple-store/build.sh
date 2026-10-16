@@ -11,7 +11,7 @@ with zipfile.ZipFile('customization/apple-store/payload.zip') as z:
     assert all(n.startswith('overlay/') and '..' not in Path(n).parts for n in names)
     for file in ['StoreThemes.swift','StorePersonalizationData.swift','StoreDiagnosticsData.swift','StoreDiagnosticsView.swift','StoreInstalledData.swift','StoreInstalledApps.swift','StoreServicesView.swift']:
         assert 'overlay/Feather/AppleStore/'+file in names
-print('PASS: complete overlay and 4.9 source files')
+print('PASS: complete overlay and 4.10 source files')
 ZIPCHECK
 
 # Select Xcode
@@ -31,7 +31,7 @@ text = subprocess.check_output(['xcodebuild', '-version'], text=True)
 assert tuple(map(int, re.search(r'Xcode (\d+)\.(\d+)', text).groups())) >= (26, 3), 'Xcode 26.3+ required'
 PY
 
-# Prepare Apple Store 4.9
+# Prepare Apple Store 4.10
 set -euo pipefail
 if [ ! -f customization/apple-store/prepare.py ]; then
   echo 'Upload apple-store folder at repository ROOT, alongside README.md.' | tee source/build-report/prepare.log
@@ -63,7 +63,7 @@ source/build-report/catalog-tests source/build-report/plain-catalog.json source/
 
 # Validate remote documents, deep links, release identity and archive integrity.
 xcrun swiftc -swift-version 5 -parse-as-library source/Feather/AppleStore/StoreCatalogData.swift source/Feather/AppleStore/StoreRemoteData.swift source/Feather/AppleStore/StoreAdvertisingData.swift source/Feather/AppleStore/StorePersonalizationData.swift source/Feather/AppleStore/StoreProExtrasData.swift source/Feather/AppleStore/StoreUpdateVerifier.swift customization/apple-store/tests/RemoteSmoke.swift -o source/build-report/remote-smoke
-source/build-report/remote-smoke customization/Online/configuration.json customization/Online/release-4.9.json | tee source/build-report/remote-smoke.log
+source/build-report/remote-smoke customization/Online/configuration.json customization/Online/release-4.10.json | tee source/build-report/remote-smoke.log
 
 # Validate advertising scheduling, schema and per-installation exemptions.
 xcrun swiftc -swift-version 5 -parse-as-library source/Feather/AppleStore/StoreCatalogData.swift source/Feather/AppleStore/StoreRemoteData.swift source/Feather/AppleStore/StoreAdvertisingData.swift source/Feather/AppleStore/StorePersonalizationData.swift source/Feather/AppleStore/StoreProExtrasData.swift customization/apple-store/tests/AdvertisingSmoke.swift -o source/build-report/advertising-smoke
@@ -150,17 +150,17 @@ from pathlib import Path
 import zipfile
 root=Path('source')
 excluded={'.git','_build','packages','deps','build-report'}
-with zipfile.ZipFile('Apple-Store-4.9-Source.zip','w',zipfile.ZIP_DEFLATED) as z:
+with zipfile.ZipFile('Apple-Store-4.10-Source.zip','w',zipfile.ZIP_DEFLATED) as z:
     for p in root.rglob('*'):
         rel=p.relative_to(root)
         if p.is_file() and not any(part in excluded for part in rel.parts) and rel.name != 'cert.json':
-            z.write(p,Path('Apple-Store-4.9-Source')/rel)
+            z.write(p,Path('Apple-Store-4.10-Source')/rel)
     for p in Path('customization/apple-store').rglob('*'):
         if p.is_file(): z.write(p,Path('BuildCustomization/apple-store')/p.relative_to('customization/apple-store'))
     for p in Path('customization/Online').rglob('*'):
         if p.is_file(): z.write(p,Path('BuildCustomization/Online')/p.relative_to('customization/Online'))
-    workflow=Path('customization/apple-store-4.9.yml')
-    if workflow.exists(): z.write(workflow,Path('BuildCustomization/apple-store-4.9.yml'))
+    workflow=Path('customization/apple-store-4.10.yml')
+    if workflow.exists(): z.write(workflow,Path('BuildCustomization/apple-store-4.10.yml'))
 PY
 
-python3 customization/apple-store/package-licenses.py source Apple-Store-4.9-Licenses.zip
+python3 customization/apple-store/package-licenses.py source Apple-Store-4.10-Licenses.zip

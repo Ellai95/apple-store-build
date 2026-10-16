@@ -1,0 +1,27 @@
+{
+  "version": "4.10",
+  "build": 491,
+  "notes": [
+    "Добавлен отдельный раздел VPN в нижней панели.",
+    "VAYR VPN: карточка, оригинальные скриншоты и установка из раздела VPN."
+  ],
+  "changelog": {
+    "id": "4.10",
+    "title": "Версия 4.10",
+    "text": "Добавлен отдельный раздел VPN в нижней панели.\nVAYR VPN: карточка, оригинальные скриншоты и установка из раздела VPN."
+  },
+  "announcement": {
+    "id": "apple-store-update-4-10-491",
+    "enabled": true,
+    "title": "Доступен Apple Store 4.10",
+    "text": "Добавлена отдельная вкладка VPN с VAYR VPN.",
+    "button": "Обновить",
+    "action": "update",
+    "url": null,
+    "modal": true,
+    "minBuild": 400,
+    "maxBuild": 490,
+    "startsAt": null,
+    "endsAt": null
+  }
+}
