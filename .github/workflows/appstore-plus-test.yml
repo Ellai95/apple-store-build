@@ -39,7 +39,7 @@ jobs:
         with:
           name: AppStore-Plus-5.0-test-IPA
           path: |
-            source/packages/Apple Store.ipa
+            source/packages/AppStore+.ipa
             source/packages/release.json
           if-no-files-found: error
           retention-days: 14

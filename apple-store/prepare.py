@@ -196,6 +196,11 @@ print('Apple Store 4.10 applied. New AppleStoreIcon; display name Apple Store. R
 
 # AppStore+ staging mode is opt-in; shipping workflows remain unchanged until review.
 if os.environ.get('APPSTORE_PLUS_PREVIEW') == '1':
+    path = source/'Feather/FeatherApp.swift'
+    text = path.read_text()
+    needle = 'struct FeatherApp: App {'
+    if text.count(needle) != 1: raise SystemExit('Unexpected application entry point')
+    path.write_text(text.replace(needle, needle+'\n\tinit() { StoreDisplayRecovery.beginLaunch() }'))
     plus = base/'plus'
     if plus.is_dir():
         shutil.copytree(plus, source, dirs_exist_ok=True)
@@ -215,6 +220,16 @@ if os.environ.get('APPSTORE_PLUS_PREVIEW') == '1':
     needle = '\tprivate let _uuid = UUID().uuidString'
     if text.count(needle) != 1: raise SystemExit('Unexpected certificate handler identity')
     path.write_text(text.replace(needle, needle+'\n\tvar storeResultUUID: String { _uuid }'))
+    path = source/'Feather/Backend/Observable/OptionsManager.swift'
+    text = path.read_text()
+    needle = 'struct Options: Codable, Equatable {'
+    if text.count(needle) != 1: raise SystemExit('Unexpected signing options model')
+    path.write_text(text.replace(needle, needle+'\n\tvar storeRemoveSupportedDevices: Bool = true'))
+    path = source/'Feather/Utilities/Handlers/SigningHandler.swift'
+    text = path.read_text()
+    needle = 'if infoDictionary["UISupportedDevices"] != nil {'
+    if text.count(needle) != 1: raise SystemExit('Unexpected supported-device signing policy')
+    path.write_text(text.replace(needle, 'if options.storeRemoveSupportedDevices, infoDictionary["UISupportedDevices"] != nil {'))
     project = source/'Feather.xcodeproj/project.pbxproj'
     text = project.read_text().replace('INFOPLIST_KEY_CFBundleDisplayName = "Apple Store";', 'INFOPLIST_KEY_CFBundleDisplayName = "AppStore+";')
     text = text.replace('CURRENT_PROJECT_VERSION = 491;', 'CURRENT_PROJECT_VERSION = 492;')

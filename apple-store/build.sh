@@ -44,6 +44,16 @@ if [ -f source/Feather/AppleStore/StoreProductMediaLayout.swift ]; then
   xcrun swiftc -swift-version 5 -parse-as-library source/Feather/AppleStore/StoreProductMediaLayout.swift customization/apple-store/tests/ProductLayoutSmoke.swift -o source/build-report/product-layout-smoke
   source/build-report/product-layout-smoke | tee source/build-report/product-layout-smoke.log
 fi
+if [ "${APPSTORE_PLUS_PREVIEW:-0}" = "1" ]; then
+  python3 - <<'DISPLAY_RECOVERY'
+from pathlib import Path
+code=Path('source/Feather/AppleStore/StoreDisplayPreferences.swift').read_text()
+a=code.index('enum StoreDisplayRecovery {'); b=code.index('\nstruct StorePlusBackground', a)
+Path('source/build-report/DisplayRecoverySmoke.swift').write_text(Path('customization/apple-store/tests/DisplayRecoverySmoke.swift').read_text()+'\n'+code[a:b])
+DISPLAY_RECOVERY
+  xcrun swiftc -swift-version 5 -parse-as-library source/build-report/DisplayRecoverySmoke.swift -o source/build-report/display-recovery-smoke
+  source/build-report/display-recovery-smoke | tee source/build-report/display-recovery-smoke.log
+fi
 xcrun swift customization/apple-store/make-launch-icon.swift source/Feather/Resources/Assets.xcassets/StoreBrand.imageset/brand.png source/Feather/Resources/Assets.xcassets/Glyph.imageset/brand.png
 python3 customization/apple-store/validate.py source 2>&1 | tee source/build-report/validation.log
 xcrun swift customization/apple-store/pack-resources.swift source customization/apple-store
@@ -148,9 +158,11 @@ test -s packages/Feather.ipa
 unzip -t packages/Feather.ipa
 python3 ../customization/apple-store/validate-ipa.py packages/Feather.ipa . build-report 2>&1 | tee build-report/ipa-validation.log
 python3 ../customization/apple-store/audit-ipa.py packages/Feather.ipa build-report
-mv packages/Feather.ipa "packages/Apple Store.ipa"
-shasum -a 256 "packages/Apple Store.ipa" > build-report/SHA256.txt
-python3 ../customization/apple-store/release-info.py "packages/Apple Store.ipa" packages/release.json
+ipa_name="Apple Store.ipa"
+if [ "${APPSTORE_PLUS_PREVIEW:-0}" = "1" ]; then ipa_name="AppStore+.ipa"; fi
+mv packages/Feather.ipa "packages/$ipa_name"
+shasum -a 256 "packages/$ipa_name" > build-report/SHA256.txt
+python3 ../customization/apple-store/release-info.py "packages/$ipa_name" packages/release.json
 )
 
 # Prepare corresponding source (GPL)
