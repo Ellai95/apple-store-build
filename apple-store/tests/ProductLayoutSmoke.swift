@@ -14,7 +14,7 @@ import Foundation
         }
         let landscape = StoreProductScreenshotGeometry.fitted(samples[2], availableWidth: 353)
         precondition(abs(landscape.width - 353) < 0.001 && landscape.height < 200)
-        let invalid = StoreProductScreenshotGeometry.fitted(.zero, availableWidth: 200)
+        let invalid = StoreProductScreenshotGeometry.fitted(CGSize(width: 0, height: 0), availableWidth: 200)
         precondition(invalid.width <= 200 && invalid.height <= 500)
         print("PASS: all product image orientations keep their own aspect ratio and fit the available width.")
     }
