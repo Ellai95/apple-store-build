@@ -53,6 +53,14 @@ Path('source/build-report/DisplayRecoverySmoke.swift').write_text(Path('customiz
 DISPLAY_RECOVERY
   xcrun swiftc -swift-version 5 -parse-as-library source/build-report/DisplayRecoverySmoke.swift -o source/build-report/display-recovery-smoke
   source/build-report/display-recovery-smoke | tee source/build-report/display-recovery-smoke.log
+  python3 - <<'LICENSE_LEASE'
+from pathlib import Path
+code=Path('source/Feather/AppleStore/StoreActivation.swift').read_text()
+a=code.index('struct StoreSubscription:'); b=code.index('\nprivate enum StorePlusKeychain',a)
+Path('source/build-report/LicenseLeaseSmoke.swift').write_text(Path('customization/apple-store/tests/LicenseLeaseSmoke.swift').read_text()+'\n'+code[a:b])
+LICENSE_LEASE
+  xcrun swiftc -swift-version 5 -parse-as-library source/build-report/LicenseLeaseSmoke.swift -o source/build-report/license-lease-smoke
+  source/build-report/license-lease-smoke | tee source/build-report/license-lease-smoke.log
 fi
 xcrun swift customization/apple-store/make-launch-icon.swift source/Feather/Resources/Assets.xcassets/StoreBrand.imageset/brand.png source/Feather/Resources/Assets.xcassets/Glyph.imageset/brand.png
 python3 customization/apple-store/validate.py source 2>&1 | tee source/build-report/validation.log

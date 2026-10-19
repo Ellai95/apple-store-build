@@ -22,14 +22,16 @@ def reply(store, message, support):
     text, buttons = ['AppStore+'], []
     for index,row in enumerate(rows,1):
         status = store.status(row)
-        label = dict(active='Активен',expired='Истёк',pending='Ожидает подключения',revoked='Приостановлен')[status['status']]
-        text.append(f"Устройство {index}: {label}\nПодключено: {status['connectedAt'][:10]}\nДоступ до: {status['expiresAt'][:10]}")
-        if status['status'] == 'active':
+        label = dict(active='Активен',expired='Истёк',pending='Ожидает подключения',revoked='Приостановлен',unlicensed='Нужен ключ доступа',certificate_expired='Нужна замена сертификата')[status['status']]
+        expiry = 'Навсегда' if status.get('lifetime') else status['expiresAt'][:10]
+        text.append(f"Устройство {index}: {label}")
+        if status['status'] != 'unlicensed': text.append(f"Доступ до: {expiry}")
+        if store.delivery_allowed(row):
             if row['install_url']:
                 buttons.append([dict(text=f'Установить AppStore+ · устройство {index}',url=row['install_url'])])
             else:
                 text.append('Персональная ссылка готовится. Сообщим о готовности при следующей проверке /install.')
-    text.append('Откройте ссылку в Safari. При первом запуске доступ подключится автоматически.')
+    text.append('Откройте ссылку в Safari. В AppStore+ введите индивидуальный ключ доступа.' if getattr(store,'paid_access',False) else 'Откройте ссылку в Safari. При первом запуске доступ подключится автоматически.')
     result = dict(chat_id=chat['id'],text='\n\n'.join(text))
     if buttons: result['reply_markup'] = dict(inline_keyboard=buttons)
     return result

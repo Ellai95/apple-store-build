@@ -34,6 +34,9 @@ def check(ipa, source, report):
             'CFBundleExecutable': 'AppleStore',
             'UILaunchStoryboardName': 'AppleStoreLaunch34',
         }
+        if plus:
+            source_info = plistlib.loads((source / 'Feather/Resources/Info.plist').read_bytes())
+            expected['AppStoreRequiresLicense'] = source_info.get('AppStoreRequiresLicense', False)
         # Keep actual metadata even when an assertion fails.
         (report / 'built-Info.plist').write_bytes(plistlib.dumps(info))
         actual = {key: info.get(key) for key in expected}
@@ -81,7 +84,7 @@ def check(ipa, source, report):
                   'iconSHA256': hashlib.sha256(preview).hexdigest(),
                   'compiledIcons': sorted(compiled), 'oldIconResources': False}
         (report / 'app-identity.json').write_text(json.dumps(result, indent=2) + '\n')
-        print('PASS: Apple Store name, version 4.10, new compiled icon and installer PNG; no old icon resources.')
+        print(f"PASS: {expected['CFBundleDisplayName']} {expected['CFBundleShortVersionString']}, compiled icon, installer PNG and package identity.")
 
 
 if __name__ == '__main__':

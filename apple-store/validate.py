@@ -53,7 +53,12 @@ for key in ['CFBundleIcons','CFBundleIcons~ipad']:
 assert plist['CFBundleIconFile'] == 'AppIcon.png'
 assert (resources/'AppleStoreDocument.png').is_file()
 entry=(root/'Feather/FeatherApp.swift').read_text()
-assert 'StoreRootView()' in entry and 'VariedTabbarView()' not in entry
+assert ('StoreAccessGate()' if plus else 'StoreRootView()') in entry and 'VariedTabbarView()' not in entry
+if plus:
+    assert isinstance(plist.get('AppStoreRequiresLicense'),bool)
+    activation = (root/'Feather/AppleStore/StoreActivation.swift').read_text()
+    assert 'ProcessInfo.processInfo.systemUptime < verifiedUntilUptime' in activation
+    assert 'func redeem(' in activation and '/v1/license/redeem' in activation
 p1=json.loads((root/'Feather.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved').read_text())
 p2=json.loads((root/'Feather.xcworkspace/xcshareddata/swiftpm/Package.resolved').read_text())
 assert p1==p2 and len(p1['pins'])==28

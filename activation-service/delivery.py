@@ -36,6 +36,8 @@ class Delivery:
             self.info = plistlib.loads(archive.read(roots[0]))
             if self.info.get('CFBundleIdentifier') != 'ru.ipa95.applestore':
                 raise ValueError('Base IPA is not our AppStore+')
+            if getattr(store,'paid_access',False) and self.info.get('AppStoreRequiresLicense') is not True:
+                raise ValueError('Paid delivery requires the new fail-closed AppStore+ base')
 
     def prepare(self, telegram_id, udid, p12, profile, password, access_days):
         if not 0 < access_days <= 366:
@@ -44,6 +46,11 @@ class Delivery:
         now = time.time()
         ends = min(now + access_days * 86400, expiry)
         account = None
+        existing_account = None
+        if getattr(self.store,'paid_access',False):
+            with self.store.db() as db:
+                found = db.execute('SELECT id FROM accounts WHERE device_id=? AND telegram_id=? ORDER BY created LIMIT 1',(udid,telegram_id)).fetchone()
+                existing_account = found['id'] if found else None
         token = secrets.token_urlsafe(32)
         published = self.root / token
         try:
@@ -97,13 +104,13 @@ class Delivery:
                 with self.store.db() as db:
                     db.execute('INSERT INTO deliveries VALUES(?,?,?)', (token, account, min(ends, now+7*86400)))
                     db.execute('UPDATE accounts SET install_url=? WHERE id=?', (link, account))
-                return {'installURL': link, 'accountID': account, 'expiresAt': date(ends)}
+                return {'installURL': link, 'accountID': account, 'expiresAt': date(ends), 'requiresLicense': bool(getattr(self.store,'paid_access',False))}
         except BaseException:
             shutil.rmtree(published, ignore_errors=True)
             if account:
                 with self.store.db() as db:
-                    db.execute('UPDATE accounts SET revoked=1 WHERE id=?', (account,))
-                    db.execute('DELETE FROM deliveries WHERE account_id=?', (account,))
+                    if account != existing_account: db.execute('UPDATE accounts SET revoked=1 WHERE id=?', (account,))
+                    db.execute('DELETE FROM deliveries WHERE token=?', (token,))
             raise
 
     def resolve(self, request_path):
@@ -113,7 +120,7 @@ class Delivery:
         token, name = match.groups()
         with self.store.db() as db:
             row = db.execute('SELECT a.*,d.expires AS delivery_expires FROM deliveries d JOIN accounts a ON a.id=d.account_id WHERE d.token=?', (token,)).fetchone()
-        if row is None or row['delivery_expires'] <= time.time() or self.store.status(row)['status'] != 'active':
+        if row is None or row['delivery_expires'] <= time.time() or not self.store.delivery_allowed(row):
             raise APIError(404, 'not_found')
         path = self.root/token/name
         if not path.is_file():

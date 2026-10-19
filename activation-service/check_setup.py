@@ -1,6 +1,7 @@
 """Check local pilot prerequisites without contacting Telegram or printing secrets."""
 import base64
 import os
+import plistlib
 from pathlib import Path
 import shutil
 from urllib.parse import urlsplit
@@ -31,6 +32,9 @@ def check():
     if source:
         try:
             with zipfile.ZipFile(Path(source)) as z:
+                roots = [name for name in z.namelist() if name.startswith('Payload/') and name.count('/') == 2 and name.endswith('.app/Info.plist')]
+                if os.environ.get('APPSTORE_PAID_ACCESS','1') == '1' and (len(roots) != 1 or plistlib.loads(z.read(roots[0])).get('AppStoreRequiresLicense') is not True):
+                    errors.append('Для платного доступа нужна новая IPA с обязательной активацией')
                 if any('_CodeSignature' in name.split('/') for name in z.namelist()):
                     errors.append('Сначала подготовьте основу через prepare_base.py')
         except (OSError, zipfile.BadZipFile): errors.append('Не удалось прочитать базовую IPA')

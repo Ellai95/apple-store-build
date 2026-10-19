@@ -77,6 +77,25 @@ class DeliveryTests(unittest.TestCase):
         self.assertLessEqual(self.store.account(result['accountID'])['ends'],time.time()+86401)
         self.assertFalse(list(self.delivery.root.glob('.job-*')))
 
+    def test_paid_installer_link_works_before_license_redemption(self):
+        from licenses import LicenseStore
+        import os
+        self.store=LicenseStore(self.root/'paid.sqlite',os.urandom(32))
+        with zipfile.ZipFile(self.root/'base.ipa','w') as archive:
+            archive.writestr('Payload/Store.app/Info.plist',plistlib.dumps(dict(CFBundleIdentifier='ru.ipa95.applestore',CFBundleVersion='492',AppStoreRequiresLicense=True)))
+        self.delivery=Delivery(self.store,self.root/'base.ipa','https://example.com',self.root/'paid-delivery','fake-zsign')
+        result=self.prepared()
+        self.assertTrue(result['requiresLicense'])
+        self.assertEqual(self.store.status(self.store.account(result['accountID']))['status'],'unlicensed')
+        self.delivery.resolve(result['installURL'].removeprefix('https://example.com'))
+        self.store.redeem_key(self.store.account(result['accountID']),self.store.issue_key(result['accountID'],'customer_1m'))
+        self.assertEqual(self.store.status(self.store.account(result['accountID']))['status'],'active')
+        old_link=result['installURL']
+        with patch('delivery.validate_credential_bytes',return_value=({},time.time()+86400)),patch('delivery.subprocess.run',return_value=subprocess.CompletedProcess([],1,b'',b'failed')):
+            with self.assertRaises(ValueError): self.delivery.prepare(123,'device-one',self.p12,self.profile,'test-password',30)
+        self.assertFalse(self.store.account(result['accountID'])['revoked'])
+        self.delivery.resolve(old_link.removeprefix('https://example.com'))
+
     def test_signer_failure_never_leaves_ready_link(self):
         with patch('delivery.validate_credential_bytes',return_value=({},time.time()+86400)),patch('delivery.subprocess.run',return_value=subprocess.CompletedProcess([],1,b'',b'private error')):
             with self.assertRaisesRegex(ValueError,'Signing failed'):

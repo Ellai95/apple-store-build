@@ -138,16 +138,25 @@ class Store:
                 raise APIError(401, 'invalid_activation')
             if row['public_key'] is not None and not hmac.compare_digest(bytes(row['public_key']), raw):
                 raise APIError(409, 'activation_already_bound')
-            if self.status(row)['status'] != 'active':
+            if not self.enrollment_allowed(row):
                 raise APIError(403, 'access_inactive')
             # Idempotent retry on the same key if a network response was lost.
             db.execute('UPDATE accounts SET public_key=? WHERE id=?', (raw, row['id']))
             token = secrets.token_urlsafe(32)
             db.execute('DELETE FROM sessions WHERE account_id=?', (row['id'],))
             db.execute('INSERT INTO sessions VALUES(?,?,?)', (digest(token),row['id'],row['ends']))
-            return dict(token=token, subscription=self.status(row))
+        return dict(token=token, subscription=self.status(row))
 
-    def authenticated(self, path, headers, body=b''):
+    def enrollment_allowed(self, row):
+        return self.status(row)['status'] == 'active'
+
+    def delivery_allowed(self, row):
+        return self.enrollment_allowed(row)
+
+    def credentials_allowed(self, row):
+        return self.enrollment_allowed(row)
+
+    def authenticated(self, path, headers, body=b'', method='GET'):
         try:
             auth = headers.get('Authorization', '')
             if not auth.startswith('Bearer '):
@@ -165,7 +174,7 @@ class Store:
             if row is None or row['session_ends'] <= time.time():
                 raise APIError(401, 'invalid_session')
             key = ec.EllipticCurvePublicKey.from_encoded_point(ec.SECP256R1(), row['public_key'])
-            canonical = '\n'.join(['GET',path,hashlib.sha256(body).hexdigest(),stamp,nonce]).encode()
+            canonical = '\n'.join([method,path,hashlib.sha256(body).hexdigest(),stamp,nonce]).encode()
             try:
                 key.verify(signature, canonical, ec.ECDSA(hashes.SHA256()))
             except InvalidSignature:
@@ -211,14 +220,23 @@ def handler(store, delivery=None):
 
         def do_POST(self):
             try:
-                if self.path != '/v1/activate':
+                if self.path not in ('/v1/activate','/v1/license/redeem'):
                     raise APIError(404,'not_found')
-                store.rate_limit(self.client_address[0])
+                if self.path == '/v1/activate': store.rate_limit(self.client_address[0])
                 size = int(self.headers.get('Content-Length',0))
                 if not 1 <= size <= 4096 or self.headers.get_content_type() != 'application/json':
                     raise APIError(400,'invalid_request')
-                body = json.loads(self.rfile.read(size))
-                self.reply(200,store.activate(body))
+                raw = self.rfile.read(size)
+                body = json.loads(raw)
+                if not isinstance(body,dict): raise APIError(400,'invalid_request')
+                if self.path == '/v1/activate':
+                    result = store.activate(body)
+                else:
+                    if not hasattr(store,'redeem_key'): raise APIError(404,'not_found')
+                    row = store.authenticated(self.path,self.headers,raw,method='POST')
+                    store.rate_limit('license:'+row['id'])
+                    result = store.redeem_key(row,body.get('key'))
+                self.reply(200,result)
             except APIError as error:
                 self.reply(error.status,dict(error=error.code))
             except (ValueError, TypeError, KeyError):
@@ -238,7 +256,7 @@ def handler(store, delivery=None):
                 status = store.status(row)
                 if self.path == '/v1/subscription':
                     self.reply(200,status)
-                elif status['status'] != 'active':
+                elif not store.credentials_allowed(row):
                     raise APIError(403,'access_inactive')
                 else:
                     self.reply(200,dict(subscription=status,**store.open(row)))
@@ -285,7 +303,11 @@ def validate_credential_bytes(p12, profile, password, device_id):
 
 
 def configured_store():
-    return Store(os.environ.get('APPSTORE_DB','activation-state/store.sqlite3'),
+    store_type = Store
+    if os.environ.get('APPSTORE_PAID_ACCESS','1') == '1':
+        from licenses import LicenseStore
+        store_type = LicenseStore
+    return store_type(os.environ.get('APPSTORE_DB','activation-state/store.sqlite3'),
                  base64.b64decode(os.environ['APPSTORE_MASTER_KEY'],validate=True))
 
 

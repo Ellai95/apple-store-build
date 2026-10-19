@@ -220,6 +220,19 @@ if os.environ.get('APPSTORE_PLUS_PREVIEW') == '1':
     needle = '\tprivate let _uuid = UUID().uuidString'
     if text.count(needle) != 1: raise SystemExit('Unexpected certificate handler identity')
     path.write_text(text.replace(needle, needle+'\n\tvar storeResultUUID: String { _uuid }'))
+    path = source/'Feather/Utilities/Handlers/SigningHandler.swift'
+    text = path.read_text()
+    needle = 'var storeResultUUID: String { _uuid }'
+    if text.count(needle) != 1: raise SystemExit('Unexpected signing handler bridge')
+    text = text.replace(needle, needle+'\n\tvar storeActivationData: Data?')
+    needle = '\t\t_movedAppPath = movedAppURL'
+    if text.count(needle) != 1: raise SystemExit('Unexpected signing working copy')
+    text = text.replace(needle, needle+'\n\t\tif let data = storeActivationData { try data.write(to: movedAppURL.appendingPathComponent("StoreActivation.json"), options: .atomic) }')
+    path.write_text(text)
+    path = source/'Feather/AppleStore/StorePlusViews.swift'
+    text = path.read_text().replace('URL(string: "https://t.me/ellai95")!', 'StoreVault.url("telegram")')
+    text = text.replace('URL(string: "https://wa.me/79667202220")!', 'StoreVault.url("whatsapp")')
+    path.write_text(text)
     path = source/'Feather/Backend/Observable/OptionsManager.swift'
     text = path.read_text()
     needle = 'struct Options: Codable, Equatable {'
@@ -230,6 +243,10 @@ if os.environ.get('APPSTORE_PLUS_PREVIEW') == '1':
     needle = 'if infoDictionary["UISupportedDevices"] != nil {'
     if text.count(needle) != 1: raise SystemExit('Unexpected supported-device signing policy')
     path.write_text(text.replace(needle, 'if options.storeRemoveSupportedDevices, infoDictionary["UISupportedDevices"] != nil {'))
+    path = source/'Feather/FeatherApp.swift'
+    text = path.read_text()
+    if text.count('StoreRootView()') != 1: raise SystemExit('Unexpected store entry point')
+    path.write_text(text.replace('StoreRootView()', 'StoreAccessGate()'))
     project = source/'Feather.xcodeproj/project.pbxproj'
     text = project.read_text().replace('INFOPLIST_KEY_CFBundleDisplayName = "Apple Store";', 'INFOPLIST_KEY_CFBundleDisplayName = "AppStore+";')
     text = text.replace('CURRENT_PROJECT_VERSION = 491;', 'CURRENT_PROJECT_VERSION = 492;')
@@ -246,6 +263,6 @@ if os.environ.get('APPSTORE_PLUS_PREVIEW') == '1':
     path = source/'Feather.xcconfig'
     path.write_text(path.read_text().replace('FEATHER_PROJECT_VERSION=4.10','FEATHER_PROJECT_VERSION=5.0'))
     path = source/'Feather/Resources/Info.plist'
-    data = plistlib.loads(path.read_bytes()); data['CFBundleDisplayName']='AppStore+'; data['CFBundleName']='AppStore+'; data['CADisableMinimumFrameDurationOnPhone']=True
+    data = plistlib.loads(path.read_bytes()); data['CFBundleDisplayName']='AppStore+'; data['CFBundleName']='AppStore+'; data['CADisableMinimumFrameDurationOnPhone']=True; data['AppStoreRequiresLicense']=os.environ.get('APPSTORE_PLUS_LICENSE_REQUIRED','1') == '1'
     path.write_bytes(plistlib.dumps(data,sort_keys=False))
     print('AppStore+ preview overlay applied; no personal activation secrets are in this source tree.')

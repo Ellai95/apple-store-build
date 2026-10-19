@@ -170,7 +170,8 @@ class DeliveryBot:
             result=self.delivery.prepare(user,draft['udid'],base64.b64decode(draft['p12'],validate=True),
                                          base64.b64decode(draft['profile'],validate=True),draft['password'],self.access_days)
             with self.lock:self.save(user,{})
-            self.telegram.send(user,'AppStore+ подготовлен. Доступ до '+result['expiresAt'][:10]+'. Откройте ссылку в Safari.',result['installURL'])
+            text = ('AppStore+ подготовлен. Откройте ссылку в Safari. Сертификат подключится автоматически; для доступа к магазину введите индивидуальный ключ владельца.' if result.get('requiresLicense') else 'AppStore+ подготовлен. Доступ до '+result['expiresAt'][:10]+'. Откройте ссылку в Safari.')
+            self.telegram.send(user,text,result['installURL'])
         except Exception:
             # Draft is retained encrypted for an explicit retry. No exception bodies contain logs.
             try:self.telegram.send(user,'Подготовка не завершена. Проверьте пароль, UDID, срок сертификата и настройки подписи. Повтор: /sign. Последняя готовая ссылка: /install.')
