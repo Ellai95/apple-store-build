@@ -114,10 +114,17 @@ assert 'func start(_ app: StoreApp) { startCatalog(app, bundleID: nil) }' in pip
 assert 'OptionsManager.shared.options =' not in pipeline
 assert 'options.appIdentifier = customBundleID' in pipeline
 assert 'signed.identifier != customBundleID' in pipeline
-assert 'signLocal(source, bundleID: customBundleID, ownsSource: retryOwnsSource, options: operationOptions, icon: operationIcon)' in pipeline
-assert 'startCatalog(app, bundleID: customBundleID, options: operationOptions, icon: operationIcon)' in pipeline
+if plus:
+    assert 'signLocal(source, bundleID: customBundleID, ownsSource: retryOwnsSource, options: operationOptions, icon: operationIcon)' in pipeline
+    assert 'startCatalog(app, bundleID: customBundleID, options: operationOptions, icon: operationIcon)' in pipeline
+else:
+    assert 'signLocal(source, bundleID: customBundleID, ownsSource: retryOwnsSource)' in pipeline
+    assert 'startCatalog(app, bundleID: customBundleID)' in pipeline
 library=(root/'Feather/AppleStore/StoreLibraryView.swift').read_text()
-assert 'Изменить Bundle ID' in library and 'onDismiss: installBundleRequest' in library
+if plus:
+    assert 'StoreCopyPickerView()' in library and 'StoreInstallSettingsView' in library
+else:
+    assert 'Изменить Bundle ID' in library and 'onDismiss: installBundleRequest' in library
 assert 'startWithBundleID' not in catalog_view
 print('PASS: Bundle ID flow, isolated operation options and retry identity.')
 
@@ -127,7 +134,7 @@ assert 'StoreBundleID.original(in: directory)' in bundle_view
 assert 'State(initialValue: original ?? "")' in bundle_view
 assert 'case .catalog(let app): value = app.bundleIdentifier' in bundle_view
 assert 'StoreBundleRequest(selection: selection' in bundle_view
-assert 'ownsSource: request.ownsSource' in library
+if not plus: assert 'ownsSource: request.ownsSource' in library
 assert 'StoreDownloader' not in bundle_view and 'StoreBundlePreparation' not in bundle_view
 assert 'bundleProfile' not in pipeline and 'StoreBundleID.permits' not in pipeline
 print('PASS: immediate editor, catalog metadata/local identity, download only on install, no profile-ID preflight gate.')
@@ -137,7 +144,7 @@ assert configuration['schemaVersion']==1
 assert [p['price'] for p in configuration['purchase']['tariffs']]==[1000,1700,2000,2500,5000]
 assert 'StoreUpdateVerifier.archive' in pipeline and 'StoreUpdateVerifier.sourceIdentity' in pipeline and 'StoreUpdateVerifier.signedIdentity' in pipeline
 assert 'selfUpdate != nil || idevice' in pipeline
-assert 'selfUpdate == nil ? (operationOptions ?? OptionsManager.shared.options) : Options.defaultOptions' in pipeline
+assert ('selfUpdate == nil ? (operationOptions ?? OptionsManager.shared.options) : Options.defaultOptions' if plus else 'selfUpdate == nil ? OptionsManager.shared.options : Options.defaultOptions') in pipeline
 assert 'remote.document.layout.settings' in settings
 assert (root/'Feather/AppleStore/StoreRemoteData.swift').is_file()
 print('PASS: remote configuration, certificate tariffs and isolated verified self-update wiring.')
