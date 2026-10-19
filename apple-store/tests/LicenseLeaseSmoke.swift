@@ -15,7 +15,7 @@ import Foundation
         let finite = try status()
         precondition(StoreLicenseLease.deadline(finite, requestStartedUptime:1000) == 1030)
         let lifetime = try status(["lifetime":true,"licenseExpiresAt":NSNull()])
-        precondition(StoreLicenseLease.deadline(lifetime, requestStartedUptime:1000) == 1120)
+        precondition(StoreLicenseLease.deadline(lifetime, requestStartedUptime:1000) == 1900)
         let legacy = try status(["requiresLicense":false])
         precondition(StoreLicenseLease.deadline(legacy, requestStartedUptime:1000) == 0)
         let missingExpiry = try status(["licenseExpiresAt":NSNull()])

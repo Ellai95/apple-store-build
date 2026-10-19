@@ -249,7 +249,7 @@ if os.environ.get('APPSTORE_PLUS_PREVIEW') == '1':
     path.write_text(text.replace('StoreRootView()', 'StoreAccessGate()'))
     project = source/'Feather.xcodeproj/project.pbxproj'
     text = project.read_text().replace('INFOPLIST_KEY_CFBundleDisplayName = "Apple Store";', 'INFOPLIST_KEY_CFBundleDisplayName = "AppStore+";')
-    text = text.replace('CURRENT_PROJECT_VERSION = 491;', 'CURRENT_PROJECT_VERSION = 492;')
+    text = text.replace('CURRENT_PROJECT_VERSION = 491;', 'CURRENT_PROJECT_VERSION = 493;')
     project.write_text(text)
     # Xcode derives CFBundleName from PRODUCT_NAME even when the source plist
     # contains our display name. Keep the tested wrapper/module paths, and set
