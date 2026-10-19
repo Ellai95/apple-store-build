@@ -24,12 +24,13 @@ def check(ipa, source, report):
         plist_name = candidates[0]
         bundle = plist_name.rsplit('/', 1)[0] + '/'
         info = plistlib.loads(archive.read(plist_name))
+        plus = (source / 'Feather/AppleStore/StoreActivation.swift').exists()
         expected = {
-            'CFBundleDisplayName': 'Apple Store',
-            'CFBundleName': 'Apple Store',
+            'CFBundleDisplayName': 'AppStore+' if plus else 'Apple Store',
+            'CFBundleName': 'AppStore+' if plus else 'Apple Store',
             'CFBundleIdentifier': 'ru.ipa95.applestore',
-            'CFBundleShortVersionString': '4.10',
-            'CFBundleVersion': '491',
+            'CFBundleShortVersionString': '5.0' if plus else '4.10',
+            'CFBundleVersion': '492' if plus else '491',
             'CFBundleExecutable': 'AppleStore',
             'UILaunchStoryboardName': 'AppleStoreLaunch34',
         }

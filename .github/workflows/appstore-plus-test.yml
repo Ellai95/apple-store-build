@@ -1,0 +1,62 @@
+name: AppStore+ 5.0 iPhone test
+on:
+  push:
+    branches: [appstore-plus-preview]
+    paths:
+      - apple-store/**
+      - .github/workflows/appstore-plus-test.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: appstore-plus-test
+  cancel-in-progress: true
+env:
+  APPSTORE_PLUS_PREVIEW: '1'
+jobs:
+  build:
+    runs-on: macos-26
+    timeout-minutes: 45
+    steps:
+      - name: Checkout AppStore+ customization
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          path: customization
+          persist-credentials: false
+      - name: Checkout tested Feather base
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: claration/Feather
+          ref: 7078b053c0af262809a48e4d3898d42b0d35fedf
+          submodules: recursive
+          path: source
+          persist-credentials: false
+      - name: Build and verify AppStore+ 5.0
+        shell: bash
+        run: bash customization/apple-store/build.sh
+      - name: AppStore+ test IPA
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: AppStore-Plus-5.0-test-IPA
+          path: |
+            source/packages/Apple Store.ipa
+            source/packages/release.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Corresponding source and licenses
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: AppStore-Plus-5.0-source-and-licenses
+          path: |
+            Apple-Store-4.10-Source.zip
+            Apple-Store-4.10-Licenses.zip
+          if-no-files-found: error
+          retention-days: 14
+      - name: Build report
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: AppStore-Plus-5.0-report
+          path: source/build-report/
+          if-no-files-found: ignore
+          retention-days: 14

@@ -193,3 +193,35 @@ info.write_bytes(plistlib.dumps(data,sort_keys=False))
 (report/'source-commit.txt').write_text(actual+'\n'+subprocess.check_output(['git','-C',str(source),'submodule','status','--recursive'],text=True))
 (report/'customization.txt').write_text('Apple Store 4.10, build 491\n'+(base/'CHANGES.md').read_text())
 print('Apple Store 4.10 applied. New AppleStoreIcon; display name Apple Store. Ready for Xcode build.')
+
+# AppStore+ staging mode is opt-in; shipping workflows remain unchanged until review.
+if os.environ.get('APPSTORE_PLUS_PREVIEW') == '1':
+    plus = base/'plus'
+    if plus.is_dir():
+        shutil.copytree(plus, source, dirs_exist_ok=True)
+    else:
+        with zipfile.ZipFile(base/'plus-payload.zip') as archive:
+            if any(not name.startswith('Feather/') or '..' in Path(name).parts for name in archive.namelist()):
+                raise SystemExit('Invalid AppStore+ overlay path')
+            archive.extractall(source)
+    for relative in ['Feather/Utilities/Handlers/ZsignHandler.swift', 'Feather/Backend/Storage/Storage+Certificate.swift']:
+        path = source/relative
+        text = path.read_text()
+        if 'cert.password ?? ""' not in text:
+            raise SystemExit('Unexpected certificate password reader: '+relative)
+        path.write_text(text.replace('cert.password ?? ""', 'StoreActivationCredential.password(for: cert)'))
+    path = source/'Feather/Utilities/Handlers/CertificateFileHandler.swift'
+    text = path.read_text()
+    needle = '\tprivate let _uuid = UUID().uuidString'
+    if text.count(needle) != 1: raise SystemExit('Unexpected certificate handler identity')
+    path.write_text(text.replace(needle, needle+'\n\tvar storeResultUUID: String { _uuid }'))
+    project = source/'Feather.xcodeproj/project.pbxproj'
+    text = project.read_text().replace('INFOPLIST_KEY_CFBundleDisplayName = "Apple Store";', 'INFOPLIST_KEY_CFBundleDisplayName = "AppStore+";')
+    text = text.replace('CURRENT_PROJECT_VERSION = 491;', 'CURRENT_PROJECT_VERSION = 492;')
+    project.write_text(text)
+    path = source/'Feather.xcconfig'
+    path.write_text(path.read_text().replace('FEATHER_PROJECT_VERSION=4.10','FEATHER_PROJECT_VERSION=5.0'))
+    path = source/'Feather/Resources/Info.plist'
+    data = plistlib.loads(path.read_bytes()); data['CFBundleDisplayName']='AppStore+'; data['CFBundleName']='AppStore+'; data['CADisableMinimumFrameDurationOnPhone']=True
+    path.write_bytes(plistlib.dumps(data,sort_keys=False))
+    print('AppStore+ preview overlay applied; no personal activation secrets are in this source tree.')

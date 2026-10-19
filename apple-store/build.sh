@@ -38,6 +38,12 @@ if [ ! -f customization/apple-store/prepare.py ]; then
   exit 1
 fi
 python3 customization/apple-store/prepare.py source 2>&1 | tee source/build-report/prepare.log
+
+# Preview-only shared gallery geometry: portrait, landscape and narrow screens.
+if [ -f source/Feather/AppleStore/StoreProductMediaLayout.swift ]; then
+  xcrun swiftc -swift-version 5 -parse-as-library source/Feather/AppleStore/StoreProductMediaLayout.swift customization/apple-store/tests/ProductLayoutSmoke.swift -o source/build-report/product-layout-smoke
+  source/build-report/product-layout-smoke | tee source/build-report/product-layout-smoke.log
+fi
 xcrun swift customization/apple-store/make-launch-icon.swift source/Feather/Resources/Assets.xcassets/StoreBrand.imageset/brand.png source/Feather/Resources/Assets.xcassets/Glyph.imageset/brand.png
 python3 customization/apple-store/validate.py source 2>&1 | tee source/build-report/validation.log
 xcrun swift customization/apple-store/pack-resources.swift source customization/apple-store
@@ -60,6 +66,10 @@ xcrun swiftc -swift-version 5 -parse-as-library source/Feather/AppleStore/StoreC
 source/build-report/services-smoke customization/Online/configuration.json | tee source/build-report/services-smoke.log
 xcrun swiftc -swift-version 5 -D STORE_VAULT_TESTS source/Feather/AppleStore/StoreVault.swift source/Feather/AppleStore/StoreCatalogData.swift customization/apple-store/tests/main.swift -o source/build-report/catalog-tests
 source/build-report/catalog-tests source/build-report/plain-catalog.json source/Feather/Resources/StoreData.bin | tee source/build-report/catalog-tests.log
+if [ -f source/Feather/AppleStore/StoreActivation.swift ]; then
+  xcrun swiftc -swift-version 5 -D STORE_VAULT_TESTS -parse-as-library source/Feather/AppleStore/StoreVault.swift source/Feather/AppleStore/StoreCatalogData.swift customization/apple-store/tests/CatalogMergeSmoke.swift -o source/build-report/catalog-merge-smoke
+  source/build-report/catalog-merge-smoke source/build-report/plain-catalog.json | tee source/build-report/catalog-merge-smoke.log
+fi
 
 # Validate remote documents, deep links, release identity and archive integrity.
 xcrun swiftc -swift-version 5 -parse-as-library source/Feather/AppleStore/StoreCatalogData.swift source/Feather/AppleStore/StoreRemoteData.swift source/Feather/AppleStore/StoreAdvertisingData.swift source/Feather/AppleStore/StorePersonalizationData.swift source/Feather/AppleStore/StoreProExtrasData.swift source/Feather/AppleStore/StoreUpdateVerifier.swift customization/apple-store/tests/RemoteSmoke.swift -o source/build-report/remote-smoke

@@ -12,6 +12,8 @@ import AppKit
     }
     @Published var stage: Stage = .idle
     @Published var progress: Double?
+    var displayProgress: Double? { progress }
+    var displayTitle: String { stage.title }
     var busy: Bool { ![.idle, .failed, .completed, .handedOff].contains(stage) }
 }
 

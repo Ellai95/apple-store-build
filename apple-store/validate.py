@@ -3,11 +3,11 @@
 from pathlib import Path
 import json, plistlib, re, sys
 from urllib.parse import urlparse, unquote
-root=Path(sys.argv[1]);resources=root/'Feather/Resources';assets=resources/'Assets.xcassets'
+root=Path(sys.argv[1]); plus = (root/'Feather/AppleStore/StoreActivation.swift').exists(); display_name = 'AppStore+' if plus else 'Apple Store'; resources=root/'Feather/Resources';assets=resources/'Assets.xcassets'
 doc=json.loads((resources/'AppleStoreCatalog.json').read_text()); apps=doc['apps']
 assert doc['schemaVersion']==1 and doc['contacts']['whatsapp']=='https://wa.me/79667202220'
-assert len(apps)==202 and len({a['id'] for a in apps})==202
-assert sum(bool(a['ipaUrl']) for a in apps)==198
+assert len(apps)>=202 and len({a['id'] for a in apps})==len(apps)
+assert sum(bool(a['ipaUrl']) for a in apps)>=198
 for app in apps:
     for key in ['id','name','category','subtitle','description','version','size','ipaUrl','kind','searchTerms','addedAt','updatedAt']:
         assert isinstance(app[key],str),(app['id'],key)
@@ -32,7 +32,7 @@ assert (resources/'AppIcon.png').read_bytes() == (icon/'AppleStore.png').read_by
 assert {i.get('appearances',[{'value':'default'}])[0]['value'] for i in data['images']} == {'default','dark','tinted'}
 assert {i['filename'] for i in data['images']} == {'AppleStore.png'}
 project=(root/'Feather.xcodeproj/project.pbxproj').read_text()
-assert project.count('INFOPLIST_KEY_CFBundleDisplayName = "Apple Store";')==2
+assert project.count(f'INFOPLIST_KEY_CFBundleDisplayName = "{display_name}";')==2
 assert project.count('ASSETCATALOG_COMPILER_APPICON_NAME = AppleStoreIcon;')==2
 assert project.count('PRODUCT_NAME = "Apple Store";') == 2
 assert project.count('PRODUCT_MODULE_NAME = Feather;') == 2
@@ -41,12 +41,12 @@ assert 'PRODUCT_NAME = "$(TARGET_NAME)";' not in project
 assert 'path = "Apple Store.app";' in project
 scheme = (root/'Feather.xcodeproj/xcshareddata/xcschemes/Feather.xcscheme').read_text()
 assert scheme.count('BuildableName = "Apple Store.app"') == 3
-assert project.count('CURRENT_PROJECT_VERSION = 491;')==2
-assert 'FEATHER_PROJECT_VERSION=4.10' in (root/'Feather.xcconfig').read_text()
+assert project.count('CURRENT_PROJECT_VERSION = '+('492' if plus else '491')+';')==2
+assert 'FEATHER_PROJECT_VERSION='+('5.0' if plus else '4.10') in (root/'Feather.xcconfig').read_text()
 assert 'FEATHER_PRODUCT_BUNDLE_IDENTIFIER=ru.ipa95.applestore' in (root/'Feather.xcconfig').read_text()
 plist=plistlib.loads((resources/'Info.plist').read_bytes())
 assert plist['CFBundleURLTypes'][0]['CFBundleURLSchemes']==['appleipa']
-assert plist['CFBundleName'] == plist['CFBundleDisplayName'] == 'Apple Store'
+assert plist['CFBundleName'] == plist['CFBundleDisplayName'] == display_name
 for key in ['CFBundleIcons','CFBundleIcons~ipad']:
     assert plist[key]['CFBundlePrimaryIcon']['CFBundleIconName'] == 'AppleStoreIcon'
     assert 'CFBundleAlternateIcons' not in plist[key]

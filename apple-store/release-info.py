@@ -8,7 +8,7 @@ with zipfile.ZipFile(p) as z:
  assert len(names)==1,'Expected one main application'
  info=plistlib.loads(z.read(names[0]))
 assert info['CFBundleIdentifier']=='ru.ipa95.applestore','Wrong app'
-assert info.get('CFBundleDisplayName',info.get('CFBundleName'))=='Apple Store','Wrong name'
+assert info.get('CFBundleDisplayName',info.get('CFBundleName')) in ['Apple Store','AppStore+'],'Wrong name'
 h=hashlib.sha256()
 with p.open('rb') as f:
  for chunk in iter(lambda:f.read(1024*1024),b''): h.update(chunk)
