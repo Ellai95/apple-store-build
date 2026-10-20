@@ -24,6 +24,22 @@ import Foundation
         precondition(StoreLicenseLease.deadline(expired, requestStartedUptime:1000) == 0)
         let certificate = try status(["lifetime":true,"certificateExpiresAt":"2026-10-19T00:00:10Z"])
         precondition(StoreLicenseLease.deadline(certificate, requestStartedUptime:1000) == 1010)
-        print("PASS: server-relative monotonic access deadlines, lifetime, expired state, missing paid marker and certificate bounds.")
+        struct LocalStorageFailure: Error {}
+        precondition(!StoreAccessFailure.invalidates(URLError(.timedOut)))
+        precondition(!StoreAccessFailure.invalidates(LocalStorageFailure()))
+        for code in [408, 429, 500, 502, 503, 404] {
+            precondition(!StoreAccessFailure.invalidates(StoreAccessFailure.http(code, message: "temporary")))
+        }
+        for code in [401, 403] {
+            precondition(StoreAccessFailure.invalidates(StoreAccessFailure.http(code, message: "denied")))
+        }
+        precondition(StoreAccessFailure.invalidates(StoreAccessFailure.invalidResponse))
+        do {
+            _ = try JSONDecoder().decode(String.self, from: Data("{}".utf8))
+            preconditionFailure("Malformed activation payload was accepted")
+        } catch {
+            precondition(StoreAccessFailure.invalidates(error))
+        }
+        print("PASS: server-relative monotonic access deadlines, lifetime, expired state, missing paid marker, certificate bounds, transient failures and explicit rejection.")
     }
 }

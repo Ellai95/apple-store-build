@@ -30,7 +30,7 @@ def check(ipa, source, report):
             'CFBundleName': 'AppStore+' if plus else 'Apple Store',
             'CFBundleIdentifier': 'ru.ipa95.applestore',
             'CFBundleShortVersionString': '5.0' if plus else '4.10',
-            'CFBundleVersion': '493' if plus else '491',
+            'CFBundleVersion': '494' if plus else '491',
             'CFBundleExecutable': 'AppleStore',
             'UILaunchStoryboardName': 'AppleStoreLaunch34',
         }

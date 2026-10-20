@@ -4,6 +4,10 @@
 import SwiftUI
 import AppKit
 
+@MainActor final class StoreTransferProgress: ObservableObject {
+    @Published var progress: Double?
+    @Published var downloaded: Int64 = 0
+}
 @MainActor final class StorePipeline: ObservableObject {
     enum Stage: String {
         case idle, downloading, importing, signing, packaging, confirming
@@ -11,7 +15,11 @@ import AppKit
         var title: String { rawValue }
     }
     @Published var stage: Stage = .idle
-    @Published var progress: Double?
+    let transfer = StoreTransferProgress()
+    var progress: Double? {
+        get { transfer.progress }
+        set { transfer.progress = newValue }
+    }
     var displayProgress: Double? { progress }
     var displayTitle: String { stage.title }
     var busy: Bool { ![.idle, .failed, .completed, .handedOff].contains(stage) }

@@ -1,6 +1,12 @@
 import Foundation
 @main struct InstalledSmoke {
     static func main() throws {
+        #if APPSTORE_PLUS
+        precondition(StoreInstalledPresence.resolve(proxy: false, state: false, workspace: true, placeholder: false) == true)
+        precondition(StoreInstalledPresence.resolve(proxy: true, state: true, workspace: true, placeholder: true) == false)
+        precondition(StoreInstalledPresence.resolve(proxy: nil, state: nil, workspace: nil, placeholder: nil) == nil)
+        precondition(StoreInstalledPresence.resolve(proxy: false, state: nil, workspace: false, placeholder: nil) == false)
+        #endif
         precondition(StoreInstalledVersions.action(installed:false,pending:false,currentVersion:"",catalogVersion:"1") == .install)
         precondition(StoreInstalledVersions.action(installed:nil,pending:true,currentVersion:"1",catalogVersion:"2") == .verify)
         precondition(StoreInstalledVersions.action(installed:true,pending:false,currentVersion:"26.40.10",catalogVersion:"26.40.10") == .open)

@@ -50,6 +50,15 @@ enum StoreSystemApps {
         precondition(manager.action(mod) == .update)
         StoreSystemApps.values["mod.id"]=(true,"13.0",replacement);manager.refresh(force:true)
         await wait { manager.action(mod) == .open }
+        let delayed=StoreApp(id:"delayed",version:"1.0",bundleIdentifier:"delayed.id")
+        StoreSystemApps.values["delayed.id"]=(false,nil,nil)
+        await wait { manager.action(delayed) == .install }
+        manager.remember(delayed,bundleID:"delayed.id",version:"1.0")
+        manager.watchInstallation(delayed)
+        try? await Task.sleep(nanoseconds:300_000_000)
+        precondition(!manager.action(delayed).downloaded)
+        StoreSystemApps.values["delayed.id"]=(true,"1.0",replacement)
+        await wait { manager.action(delayed) == .open }
         print("PASS: actual registry waits for system confirmation, retains old version after failed update, detects uninstall/unknown, opens actual signed ID and handles same-version mod replacement.")
     }
 }

@@ -209,6 +209,16 @@ if os.environ.get('APPSTORE_PLUS_PREVIEW') == '1':
             if any(not name.startswith('Feather/') or '..' in Path(name).parts for name in archive.namelist()):
                 raise SystemExit('Invalid AppStore+ overlay path')
             archive.extractall(source)
+    # Build nested manifest/install URLs structurally. App names may contain URL delimiters.
+    p=source/'Feather/Backend/Server/ServerInstaller+Compute.swift'; s=p.read_text()
+    a=s.index('\tvar externalServerLink: String {')
+    b=s.index('\n\tvar iTunesLink: String',a)
+    s=s[:a]+'\tvar externalServerLink: String {\n        StoreInstallationLinks.externalManifest(\n            service: URL(string: "https://api.palera.in/genPlist")!,\n            bundleID: app.identifier ?? "", name: app.name ?? "", version: app.version ?? "",\n            payload: payloadEndpoint)?.absoluteString ?? ""\n    }\n'+s[b:]
+    a=s.index('\tprivate func _iTunesLink(with url: String) -> String {')
+    b=s.index('\n\tvar displayImageSmallEndpoint:',a)
+    s=s[:a]+'\tprivate func _iTunesLink(with url: String) -> String {\n        StoreInstallationLinks.install(manifest: url)\n    }\n'+s[b:]
+    p.write_text(s)
+
     for relative in ['Feather/Utilities/Handlers/ZsignHandler.swift', 'Feather/Backend/Storage/Storage+Certificate.swift']:
         path = source/relative
         text = path.read_text()
@@ -249,7 +259,7 @@ if os.environ.get('APPSTORE_PLUS_PREVIEW') == '1':
     path.write_text(text.replace('StoreRootView()', 'StoreAccessGate()'))
     project = source/'Feather.xcodeproj/project.pbxproj'
     text = project.read_text().replace('INFOPLIST_KEY_CFBundleDisplayName = "Apple Store";', 'INFOPLIST_KEY_CFBundleDisplayName = "AppStore+";')
-    text = text.replace('CURRENT_PROJECT_VERSION = 491;', 'CURRENT_PROJECT_VERSION = 493;')
+    text = text.replace('CURRENT_PROJECT_VERSION = 491;', 'CURRENT_PROJECT_VERSION = 494;')
     project.write_text(text)
     # Xcode derives CFBundleName from PRODUCT_NAME even when the source plist
     # contains our display name. Keep the tested wrapper/module paths, and set

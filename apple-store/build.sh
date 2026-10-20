@@ -70,8 +70,11 @@ source/build-report/vault-smoke source | tee source/build-report/vault-smoke.log
 git -C customization rev-parse HEAD > source/build-report/customization-commit.txt
 git -C source diff > source/build-report/source-changes.patch
 xcrun swiftc -frontend -parse source/Feather/AppleStore/*.swift
-xcrun swiftc -swift-version 5 -parse-as-library source/Feather/AppleStore/StoreInstalledData.swift customization/apple-store/tests/InstalledSmoke.swift -o source/build-report/installed-smoke
+test_defines=(-D APPSTORE_BASE)
+if [[ -f source/Feather/AppleStore/StoreActivation.swift ]]; then test_defines=(-D APPSTORE_PLUS); fi
+xcrun swiftc -swift-version 5 "${test_defines[@]}" -parse-as-library source/Feather/AppleStore/StoreInstalledData.swift customization/apple-store/tests/InstalledSmoke.swift -o source/build-report/installed-smoke
 source/build-report/installed-smoke | tee source/build-report/installed-smoke.log
+if [[ -f source/Feather/AppleStore/StoreActivation.swift ]]; then
 python3 - <<'INSTALLED_FIXTURE'
 from pathlib import Path
 code=Path('source/Feather/AppleStore/StoreInstalledApps.swift').read_text()
@@ -80,6 +83,7 @@ Path('source/build-report/InstalledRegistryActual.swift').write_text(Path('custo
 INSTALLED_FIXTURE
 xcrun swiftc -swift-version 5 -parse-as-library source/Feather/AppleStore/StoreInstalledData.swift source/build-report/InstalledRegistryActual.swift -o source/build-report/installed-registry-smoke
 source/build-report/installed-registry-smoke | tee source/build-report/installed-registry-smoke.log
+fi
 xcrun swiftc -swift-version 5 -parse-as-library source/Feather/AppleStore/StoreCatalogData.swift source/Feather/AppleStore/StoreRemoteData.swift source/Feather/AppleStore/StoreAdvertisingData.swift source/Feather/AppleStore/StorePersonalizationData.swift source/Feather/AppleStore/StoreProExtrasData.swift customization/apple-store/tests/ServicesSmoke.swift -o source/build-report/services-smoke
 source/build-report/services-smoke customization/Online/configuration.json | tee source/build-report/services-smoke.log
 xcrun swiftc -swift-version 5 -D STORE_VAULT_TESTS source/Feather/AppleStore/StoreVault.swift source/Feather/AppleStore/StoreCatalogData.swift customization/apple-store/tests/main.swift -o source/build-report/catalog-tests
@@ -145,6 +149,10 @@ python3 -u customization/apple-store/tests/download-server.py source/build-repor
 set -euo pipefail
 xcrun swiftc -swift-version 5 -parse-as-library source/Feather/AppleStore/StoreInstallationDefaults.swift customization/apple-store/tests/InstallDefaultsSmoke.swift -o source/build-report/defaults-smoke
 source/build-report/defaults-smoke | tee source/build-report/defaults-smoke.log
+if [[ -f source/Feather/AppleStore/StoreActivation.swift ]]; then
+  xcrun swiftc -swift-version 5 -parse-as-library source/Feather/AppleStore/StoreInstallationDefaults.swift source/Feather/AppleStore/StoreCleanup.swift customization/apple-store/tests/InstallLinksSmoke.swift -o source/build-report/install-links-smoke
+  source/build-report/install-links-smoke | tee source/build-report/install-links-smoke.log
+fi
 xcrun swiftc -swift-version 5 -parse-as-library source/Feather/AppleStore/StoreVault.swift source/Feather/AppleStore/StoreCatalogData.swift source/Feather/AppleStore/StoreFileSizes.swift customization/apple-store/tests/FileSizeSmoke.swift -o source/build-report/file-size-smoke
 source/build-report/file-size-smoke | tee source/build-report/file-size-smoke.log
 
